@@ -2534,11 +2534,14 @@
     if (!el) return;
 
     const books = loadBooks(tab);
-    const available = [...new Set(books.flatMap(b => b.genres || []).filter(Boolean))].sort();
+    const customGenres = loadCustomGenres();
+    const customSet = new Set(customGenres);
+    const masterSet = new Set([...GENRE_SUGGESTIONS, ...customGenres]);
+    // Only show genres that exist in the master list — deleted custom genres disappear even if books still have them
+    const available = [...new Set(books.flatMap(b => b.genres || []).filter(g => g && masterSet.has(g)))].sort();
     _gfAvailable[tab] = available;
     const cur = genreFilter[tab];
     const isOpen = genreFilterOpen[tab];
-    const customSet = new Set(loadCustomGenres());
 
     // Update toggle button state
     if (btn) {
@@ -2552,14 +2555,12 @@
     if (!isOpen && !cur) { el.innerHTML = ''; return; }
     if (!available.length) { el.innerHTML = ''; return; }
 
+    console.log('[GenreFilter] Opening for tab:', tab, '| Custom genres in localStorage:', JSON.parse(localStorage.getItem('tbr_custom_genres') || '[]'));
+
     const btns = available.map((g, i) => {
-      const isCustom = customSet.has(g);
-      const delBtn = isCustom
-        ? `<button class="btn-gf-del" onclick="deleteFilterGenre(${i},'${tab}')" title="Remove custom genre">×</button>`
-        : '';
       return `<span class="genre-filter-chip">` +
         `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}')">` +
-        `${esc(g)}</button>${delBtn}</span>`;
+        `${esc(g)}</button></span>`;
     }).join('');
     el.innerHTML = `<div class="genre-filter-panel">
       <span class="genre-filter-label">Filter:</span>
@@ -2569,22 +2570,6 @@
     </div>`;
   }
 
-  async function deleteFilterGenre(idx, tab) {
-    const genre = _gfAvailable[tab][idx];
-    if (!genre) return;
-    const updated = loadCustomGenres().filter(g => g !== genre);
-    saveCustomGenres(updated);
-    try {
-      await fetch(`${SB_URL}/rest/v1/books`, {
-        method: 'POST',
-        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
-        body: JSON.stringify({ id: '__custom_genres__', tab: '__meta__', title: '__custom_genres__',
-          notes: JSON.stringify(updated) }),
-      });
-    } catch {}
-    render('fiction');
-    render('nonfiction');
-  }
 
   function toggleGenreFilter(tab) {
     genreFilterOpen[tab] = !genreFilterOpen[tab];
