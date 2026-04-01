@@ -2780,7 +2780,7 @@
       return;
     }
     list.innerHTML = custom.map(g =>
-      `<span class="manage-genre-chip">${esc(g)}<button class="manage-genre-del" onclick="deleteCustomGenre(${JSON.stringify(g)})" title="Remove ${esc(g)}">×</button></span>`
+      `<span class="manage-genre-chip">${esc(g)}<button class="manage-genre-del" data-genre="${esc(g)}" title="Remove ${esc(g)}">×</button></span>`
     ).join('');
   }
   async function deleteCustomGenre(genre) {
@@ -2801,7 +2801,9 @@
     render('nonfiction');
   }
   document.getElementById('manage-genres-overlay').addEventListener('click', function(e) {
-    if (e.target === this) closeManageGenres();
+    if (e.target === this) { closeManageGenres(); return; }
+    const delBtn = e.target.closest('.manage-genre-del');
+    if (delBtn && delBtn.dataset.genre) deleteCustomGenre(delBtn.dataset.genre);
   });
 </script>
 
