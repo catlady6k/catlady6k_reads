@@ -111,12 +111,12 @@
     position: relative;
   }
   .header-logo {
-    height: 56px;
+    height: 55px;
     width: auto;
     flex-shrink: 0;
-    filter: brightness(1.2);
     display: block;
   }
+  .header-logo-flip { transform: scaleX(-1); }
   .app-header h1 {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.8rem;
@@ -1102,8 +1102,9 @@
 
 <header class="app-header">
   <div class="header-title-wrap">
-    <img src="https://catlady6k.github.io/catlady6k_reads/boot.png" alt="" class="header-logo">
+    <img src="https://catlady6k.github.io/catlady6k_reads/stars.png" alt="" class="header-logo">
     <h1>Catlady6k's Reads</h1>
+    <img src="https://catlady6k.github.io/catlady6k_reads/stars.png" alt="" class="header-logo header-logo-flip">
   </div>
   <p>Your personal to-be-read list</p>
 </header>
