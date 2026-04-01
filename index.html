@@ -2772,18 +2772,23 @@
   function closeManageGenres() {
     document.getElementById('manage-genres-overlay').classList.remove('open');
   }
+  // Holds the currently displayed custom genres so index-based onclick can reference them safely
+  let _mgGenres = [];
+
   function renderManageGenresModal() {
-    const custom = loadCustomGenres();
+    _mgGenres = loadCustomGenres();
     const list = document.getElementById('manage-genres-list');
-    if (!custom.length) {
+    if (!_mgGenres.length) {
       list.innerHTML = '<span class="manage-genres-empty">No custom genres saved yet.</span>';
       return;
     }
-    list.innerHTML = custom.map(g =>
-      `<span class="manage-genre-chip">${esc(g)}<button class="manage-genre-del" data-genre="${esc(g)}" title="Remove ${esc(g)}">×</button></span>`
+    list.innerHTML = _mgGenres.map((g, i) =>
+      `<span class="manage-genre-chip">${esc(g)}<button class="manage-genre-del" onclick="deleteCustomGenre(${i})" title="Remove ${esc(g)}">×</button></span>`
     ).join('');
   }
-  async function deleteCustomGenre(genre) {
+  async function deleteCustomGenre(idx) {
+    const genre = _mgGenres[idx];
+    if (genre === undefined) return;
     const updated = loadCustomGenres().filter(g => g !== genre);
     saveCustomGenres(updated);
     // Sync deletion to Supabase metadata row
@@ -2796,19 +2801,13 @@
       });
     } catch {}
     renderManageGenresModal();
-    // Refresh genre dropdowns/filters in both tabs without touching book data
     render('fiction');
     render('nonfiction');
   }
-  document.getElementById('manage-genres-overlay').addEventListener('click', function(e) {
-    if (e.target === this) { closeManageGenres(); return; }
-    const delBtn = e.target.closest('.manage-genre-del');
-    if (delBtn && delBtn.dataset.genre) deleteCustomGenre(delBtn.dataset.genre);
-  });
 </script>
 
 <!-- Manage genres modal -->
-<div class="manage-genres-overlay" id="manage-genres-overlay">
+<div class="manage-genres-overlay" id="manage-genres-overlay" onclick="if(event.target===this)closeManageGenres()">
   <div class="manage-genres-dialog">
     <div class="manage-genres-header">
       <span class="manage-genres-title">Manage Custom Genres</span>
