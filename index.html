@@ -1200,6 +1200,15 @@
 
 <!-- UTIL BAR -->
 <div class="util-bar">
+  <button class="btn-util" onclick="exportData()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export backup
+  </button>
+  <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(this.files[0])">
+  <button class="btn-util" onclick="document.getElementById('import-file-input').value='';document.getElementById('import-file-input').click()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="17"/></svg>
+    Import to Supabase
+  </button>
   <span class="sync-status" id="sync-status"></span>
 </div>
 
@@ -2099,6 +2108,73 @@
     }
   }
 
+
+  /* ---- EXPORT / IMPORT (migration) ---- */
+  function exportData() {
+    const payload = { version: 1, exported: new Date().toISOString(), data: {} };
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('tbr')) payload.data[key] = localStorage.getItem(key);
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'tbr-backup.json';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }
+
+  async function importData(file) {
+    if (!file) return;
+    const text = await file.text();
+    let entries;
+    try {
+      const payload = JSON.parse(text);
+      entries = payload.data || payload;
+      if (typeof entries !== 'object' || Array.isArray(entries)) throw new Error();
+    } catch {
+      alert('Import failed — not a valid TBR backup.');
+      return;
+    }
+
+    const allBooks = [];
+    for (const [key, val] of Object.entries(entries)) {
+      if (key !== 'tbr_fiction' && key !== 'tbr_nonfiction') continue;
+      const tab = key === 'tbr_fiction' ? 'fiction' : 'nonfiction';
+      try {
+        const books = JSON.parse(val);
+        if (Array.isArray(books)) books.forEach(b => allBooks.push({ book: b, tab }));
+      } catch {}
+    }
+
+    if (!allBooks.length) { alert('No books found in backup.'); return; }
+
+    setSyncStatus('loading');
+    let failed = 0;
+    for (const { book, tab } of allBooks) {
+      try {
+        const res = await fetch(`${SB_URL}/rest/v1/books`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify(toDb(book, tab)),
+        });
+        if (!res.ok) failed++;
+      } catch { failed++; }
+    }
+
+    if (failed === 0) {
+      setSyncStatus('ok');
+      alert(`✓ Imported ${allBooks.length} books into Supabase.`);
+    } else {
+      setSyncStatus('error');
+      alert(`Imported ${allBooks.length - failed} of ${allBooks.length} books. ${failed} failed.`);
+    }
+
+    // Reload from Supabase and re-render
+    await sbLoadAll();
+    render('fiction');
+    render('nonfiction');
+  }
 
   /* ---- COVER CACHE ---- */
   function getCoverCache(id) {
