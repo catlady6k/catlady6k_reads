@@ -1,3 +1,7 @@
+  -- Optional: enable Row Level Security (allow all for single-user personal use)
+  -- alter table books enable row level security;
+  -- create policy "allow all" on books for all using (true) with check (true);
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1061,16 +1065,16 @@
     border-color: var(--border-mid);
     color: var(--text-secondary);
   }
-  .btn-util svg { vertical-align: -3px; margin-right: 5px; opacity: 0.75; }
-  .import-feedback {
+  .sync-status {
     font-size: 0.78rem;
-    color: #18884A;
     font-weight: 600;
-    opacity: 0;
-    transition: opacity 0.3s ease;
     pointer-events: none;
+    transition: opacity 0.3s ease;
   }
-  .import-feedback.visible { opacity: 1; }
+  .sync-ok      { color: #18884A; }
+  .sync-warn    { color: #B07A10; }
+  .sync-error   { color: #C03030; }
+  .sync-loading { color: var(--text-muted); }
 </style>
 </head>
 <body>
@@ -1200,19 +1204,130 @@
 
 <!-- UTIL BAR -->
 <div class="util-bar">
-  <button class="btn-util" onclick="exportData()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Export backup
-  </button>
-  <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(this.files[0])">
-  <button class="btn-util" onclick="triggerImport()">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="17"/></svg>
-    Import backup
-  </button>
-  <span class="import-feedback" id="import-feedback">✓ Data restored</span>
+  <span class="sync-status" id="sync-status"></span>
 </div>
 
 <script>
+  /* ---- SUPABASE CONFIG ---- */
+  const SB_URL = 'https://jsudggsevtqujoqfeput.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdWRnZ3NldnRxdWpvcWZlcHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMDc1NjgsImV4cCI6MjA5MDU4MzU2OH0.q3gwbrJpTecbL8nbmp3F_h5SgJG3ymeJNN0dwtiYGBo';
+
+  function sbHeaders(extras = {}) {
+    return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', ...extras };
+  }
+
+  // Convert app book object → Supabase row
+  function toDb(book, tab) {
+    return {
+      id:            book.id,
+      tab,
+      title:         book.title         || '',
+      author:        book.author        || '',
+      pages:         book.pages         || 0,
+      status:        book.status        || 'Not Started',
+      date_finished: book.dateFinished  || null,
+      owned:         book.owned         || false,
+      pages_read:    book.pagesRead     || 0,
+      rating:        book.rating        || 0,
+      genre:         book.genre         || null,
+      notes:         book.notes         || null,
+      date_started:  book.dateStarted   || null,
+      cover_url:     null,
+    };
+  }
+
+  // Convert Supabase row → app book object
+  function fromDb(row) {
+    return {
+      id:           row.id,
+      title:        row.title         || '',
+      author:       row.author        || '',
+      pages:        row.pages         || 0,
+      status:       row.status        || 'Not Started',
+      dateFinished: row.date_finished || '',
+      owned:        !!row.owned,
+      pagesRead:    row.pages_read    || 0,
+      rating:       row.rating        || 0,
+      genre:        row.genre         || '',
+      notes:        row.notes         || '',
+      dateStarted:  row.date_started  || '',
+    };
+  }
+
+  function setSyncStatus(state) {
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    if (state === 'ok') {
+      el.textContent = '✓ Synced';
+      el.className = 'sync-status sync-ok';
+      setTimeout(() => { if (el.classList.contains('sync-ok')) el.textContent = ''; }, 2000);
+    } else if (state === 'offline') {
+      el.textContent = '⚠ Offline — showing cached data';
+      el.className = 'sync-status sync-warn';
+    } else if (state === 'error') {
+      el.textContent = '⚠ Sync error';
+      el.className = 'sync-status sync-error';
+    } else if (state === 'loading') {
+      el.textContent = '⟳ Loading…';
+      el.className = 'sync-status sync-loading';
+    }
+  }
+
+  // Load all books from Supabase, populate localStorage cache
+  async function sbLoadAll() {
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/books?select=*`, { headers: sbHeaders() });
+      if (!res.ok) throw new Error(res.status);
+      const rows = await res.json();
+      saveBooks('fiction',    rows.filter(r => r.tab === 'fiction').map(fromDb));
+      saveBooks('nonfiction', rows.filter(r => r.tab === 'nonfiction').map(fromDb));
+      setSyncStatus('ok');
+      return true;
+    } catch (e) {
+      console.warn('Supabase load failed, using local cache:', e);
+      setSyncStatus('offline');
+      return false;
+    }
+  }
+
+  // Upsert a single book to Supabase (fire-and-forget, non-blocking)
+  async function sbUpsert(book, tab) {
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/books`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify(toDb(book, tab)),
+      });
+      if (!res.ok) throw new Error(res.status);
+      setSyncStatus('ok');
+    } catch (e) {
+      console.warn('Supabase upsert failed:', e);
+      setSyncStatus('error');
+    }
+  }
+
+  // Delete a book from Supabase
+  async function sbDelete(id) {
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/books?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: sbHeaders({ 'Prefer': 'return=minimal' }),
+      });
+      if (!res.ok) throw new Error(res.status);
+      setSyncStatus('ok');
+    } catch (e) {
+      console.warn('Supabase delete failed:', e);
+      setSyncStatus('error');
+    }
+  }
+
+  // Debounced upsert — avoids hammering Supabase on every keystroke (pages read, notes)
+  const _sbTimers = {};
+  function sbUpsertDebounced(book, tab, key, delay = 1000) {
+    clearTimeout(_sbTimers[key]);
+    _sbTimers[key] = setTimeout(() => sbUpsert(book, tab), delay);
+  }
+
   const STATUSES = ['Not Started', 'In Progress', 'Finished', 'Paused'];
   const STATUS_CLS = {
     'In Progress': 's-inprogress',
@@ -1258,7 +1373,7 @@
     catch { return { col: null, dir: 'asc' }; }
   }
   function saveSortState(tab, state) { localStorage.setItem(SORT_KEYS[tab], JSON.stringify(state)); }
-  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+  function genId() { return crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)); }
   function today() { return new Date().toISOString().slice(0, 10); }
 
   /* ---- SORT ---- */
@@ -1755,6 +1870,7 @@
     justAddedId = newBook.id;
     render(tab);
     justAddedId = null;
+    sbUpsert(newBook, tab);
   }
 
   function deleteBook(btn) {
@@ -1765,6 +1881,7 @@
     function doDelete() {
       saveBooks(tab, loadBooks(tab).filter(b => b.id !== id));
       render(tab);
+      sbDelete(id);
     }
     if (tr) {
       tr.classList.add('tr-exit');
@@ -1791,6 +1908,7 @@
     }
     saveBooks(tab, books);
     render(tab);
+    sbUpsert(book, tab);
   }
 
   function updatePagesRead(input) {
@@ -1801,6 +1919,7 @@
     const val = Math.max(0, Math.min(Number(input.value) || 0, Number(book.pages) || 99999));
     book.pagesRead = val;
     saveBooks(tab, books);
+    sbUpsertDebounced(book, tab, 'pr_' + id);
     // Patch DOM without re-render to preserve focus
     const row = input.closest('tr');
     if (row) {
@@ -1821,6 +1940,7 @@
     book.owned = checkbox.checked;
     saveBooks(tab, books);
     checkbox.title = book.owned ? 'Owned' : 'Not owned';
+    sbUpsert(book, tab);
   }
 
   function updateDate(input) {
@@ -1831,6 +1951,7 @@
     book.dateFinished = input.value;
     saveBooks(tab, books);
     renderYearStats();
+    sbUpsert(book, tab);
   }
 
   function handleSort(tab, col) {
@@ -1901,6 +2022,7 @@
     if (!book) return;
     book.rating = (book.rating === star) ? 0 : star;
     saveBooks(tab, books);
+    sbUpsert(book, tab);
     // Patch stars inline — no full re-render needed
     const stars = btn.closest('.star-row').querySelectorAll('.star-btn');
     stars.forEach((s, i) => s.classList.toggle('filled', book.rating >= i + 1));
@@ -1981,62 +2103,6 @@
     }
   }
 
-  /* ---- EXPORT / IMPORT ---- */
-  function exportData() {
-    const payload = { version: 1, exported: new Date().toISOString(), data: {} };
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('tbr')) {
-        payload.data[key] = localStorage.getItem(key);
-      }
-    }
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'tbr-backup.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function triggerImport() {
-    document.getElementById('import-file-input').value = '';
-    document.getElementById('import-file-input').click();
-  }
-
-  function importData(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const payload = JSON.parse(e.target.result);
-        const entries = payload.data || payload; // support both versioned and raw formats
-        if (typeof entries !== 'object' || Array.isArray(entries)) throw new Error('Invalid format');
-        // Clear existing tbr keys then restore
-        const keysToRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('tbr')) keysToRemove.push(k);
-        }
-        keysToRemove.forEach(k => localStorage.removeItem(k));
-        Object.entries(entries).forEach(([k, v]) => {
-          if (k.startsWith('tbr')) localStorage.setItem(k, v);
-        });
-        render('fiction');
-        render('nonfiction');
-        renderYearStats();
-        // Show feedback
-        const fb = document.getElementById('import-feedback');
-        fb.classList.add('visible');
-        setTimeout(() => fb.classList.remove('visible'), 2500);
-      } catch {
-        alert('Import failed — the file does not appear to be a valid TBR backup.');
-      }
-    };
-    reader.readAsText(file);
-  }
 
   /* ---- COVER CACHE ---- */
   function getCoverCache(id) {
@@ -2220,6 +2286,7 @@
     if (!book) return;
     book.notes = textarea.value;
     saveBooks(tab, books);
+    sbUpsertDebounced(book, tab, 'note_' + id);
   }
 
   /* ---- RESIZE HANDLER ---- */
@@ -2233,8 +2300,19 @@
   });
 
   /* ---- INIT ---- */
-  render('fiction');
-  render('nonfiction');
+  async function init() {
+    // Render from local cache immediately so the UI isn't blank
+    render('fiction');
+    render('nonfiction');
+    // Then fetch from Supabase and re-render with fresh data
+    setSyncStatus('loading');
+    const ok = await sbLoadAll();
+    if (ok) {
+      render('fiction');
+      render('nonfiction');
+    }
+  }
+  init();
 </script>
 </body>
 </html>
