@@ -837,53 +837,14 @@
   .genre-input-popup select:focus { border-color: var(--accent); }
   .genre-input-popup-row { display: flex; gap: 5px; margin-top: 5px; }
 
-  /* Manage genres modal */
-  .manage-genres-overlay {
-    display: none; position: fixed; inset: 0; z-index: 1000;
-    background: rgba(0,0,0,0.65); align-items: center; justify-content: center;
+  /* Custom genre delete button inside filter panel */
+  .genre-filter-chip { display: inline-flex; align-items: center; }
+  .btn-gf-del {
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 0.75rem; line-height: 1; padding: 0 3px 0 1px;
+    margin-left: -3px; transition: color 0.15s; font-family: inherit;
   }
-  .manage-genres-overlay.open { display: flex; }
-  .manage-genres-dialog {
-    background: var(--surface-2); border: 1px solid var(--border-mid);
-    border-radius: 12px; padding: 22px 24px 20px; min-width: 300px; max-width: 420px;
-    width: 90vw; box-shadow: 0 8px 40px rgba(0,0,0,0.7);
-  }
-  .manage-genres-header {
-    display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
-  }
-  .manage-genres-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
-  .manage-genres-close {
-    background: none; border: none; color: var(--text-muted); font-size: 1.1rem;
-    cursor: pointer; padding: 2px 6px; border-radius: 4px; line-height: 1;
-    transition: color 0.15s;
-  }
-  .manage-genres-close:hover { color: var(--text-primary); }
-  .manage-genres-note {
-    font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;
-  }
-  .manage-genres-list {
-    display: flex; flex-wrap: wrap; gap: 7px; min-height: 32px;
-  }
-  .manage-genres-empty {
-    font-size: 0.8rem; color: var(--text-muted); font-style: italic;
-  }
-  .manage-genre-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: var(--surface-3); border: 1px solid var(--border-mid);
-    border-radius: 20px; padding: 3px 10px 3px 12px; font-size: 0.8rem;
-    color: var(--text-primary);
-  }
-  .manage-genre-del {
-    background: none; border: none; color: var(--text-muted); cursor: pointer;
-    font-size: 0.9rem; line-height: 1; padding: 0 1px; transition: color 0.15s;
-  }
-  .manage-genre-del:hover { color: var(--accent); }
-  .btn-manage-genres {
-    background: none; border: none; color: var(--text-muted); font-size: 0.72rem;
-    cursor: pointer; padding: 0 4px; font-family: inherit; text-decoration: underline;
-    text-underline-offset: 2px; transition: color 0.15s; white-space: nowrap;
-  }
-  .btn-manage-genres:hover { color: var(--text-primary); }
+  .btn-gf-del:hover { color: var(--accent); }
   .genre-input-text {
     flex: 1; padding: 5px 8px; background: var(--surface-3);
     border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);
@@ -1263,7 +1224,6 @@
     <div class="toolbar">
       <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('fiction', this.value)" id="search-fiction">
       <button class="btn-genre-filter" id="gf-btn-fiction" onclick="toggleGenreFilter('fiction')">⊞ Genre</button>
-      <button class="btn-manage-genres" onclick="openManageGenres()">Manage genres</button>
       <button class="btn-random" onclick="pickRandom('fiction')">🎲 Random Pick</button>
       <button class="btn-add" onclick="toggleForm('fiction')">+ Add Book</button>
     </div>
@@ -1312,7 +1272,6 @@
     <div class="toolbar">
       <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('nonfiction', this.value)" id="search-nonfiction">
       <button class="btn-genre-filter" id="gf-btn-nonfiction" onclick="toggleGenreFilter('nonfiction')">⊞ Genre</button>
-      <button class="btn-manage-genres" onclick="openManageGenres()">Manage genres</button>
       <button class="btn-random" onclick="pickRandom('nonfiction')">🎲 Random Pick</button>
       <button class="btn-add" onclick="toggleForm('nonfiction')">+ Add Book</button>
     </div>
@@ -2567,6 +2526,8 @@
     return [...new Set([...GENRE_SUGGESTIONS, ...loadCustomGenres()])].sort();
   }
 
+  let _gfAvailable = { fiction: [], nonfiction: [] };
+
   function renderGenreFilter(tab) {
     const el = document.getElementById('genre-filter-' + tab);
     const btn = document.getElementById('gf-btn-' + tab);
@@ -2574,8 +2535,10 @@
 
     const books = loadBooks(tab);
     const available = [...new Set(books.flatMap(b => b.genres || []).filter(Boolean))].sort();
+    _gfAvailable[tab] = available;
     const cur = genreFilter[tab];
     const isOpen = genreFilterOpen[tab];
+    const customSet = new Set(loadCustomGenres());
 
     // Update toggle button state
     if (btn) {
@@ -2589,16 +2552,38 @@
     if (!isOpen && !cur) { el.innerHTML = ''; return; }
     if (!available.length) { el.innerHTML = ''; return; }
 
-    const btns = available.map(g =>
-      `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}')">` +
-      `${esc(g)}</button>`
-    ).join('');
+    const btns = available.map((g, i) => {
+      const isCustom = customSet.has(g);
+      const delBtn = isCustom
+        ? `<button class="btn-gf-del" onclick="deleteFilterGenre(${i},'${tab}')" title="Remove custom genre">×</button>`
+        : '';
+      return `<span class="genre-filter-chip">` +
+        `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}')">` +
+        `${esc(g)}</button>${delBtn}</span>`;
+    }).join('');
     el.innerHTML = `<div class="genre-filter-panel">
       <span class="genre-filter-label">Filter:</span>
       ${btns}
       <button class="btn-genre${!cur ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}',null)">All</button>
       <button class="btn-gf-close" onclick="closeGenreFilter('${tab}')" title="Close">✕</button>
     </div>`;
+  }
+
+  async function deleteFilterGenre(idx, tab) {
+    const genre = _gfAvailable[tab][idx];
+    if (!genre) return;
+    const updated = loadCustomGenres().filter(g => g !== genre);
+    saveCustomGenres(updated);
+    try {
+      await fetch(`${SB_URL}/rest/v1/books`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify({ id: '__custom_genres__', tab: '__meta__', title: '__custom_genres__',
+          notes: JSON.stringify(updated) }),
+      });
+    } catch {}
+    render('fiction');
+    render('nonfiction');
   }
 
   function toggleGenreFilter(tab) {
@@ -2764,58 +2749,7 @@
   }
   init();
 
-  /* ---- MANAGE GENRES MODAL ---- */
-  function openManageGenres() {
-    document.getElementById('manage-genres-overlay').classList.add('open');
-    renderManageGenresModal();
-  }
-  function closeManageGenres() {
-    document.getElementById('manage-genres-overlay').classList.remove('open');
-  }
-  // Holds the currently displayed custom genres so index-based onclick can reference them safely
-  let _mgGenres = [];
 
-  function renderManageGenresModal() {
-    _mgGenres = loadCustomGenres();
-    const list = document.getElementById('manage-genres-list');
-    if (!_mgGenres.length) {
-      list.innerHTML = '<span class="manage-genres-empty">No custom genres saved yet.</span>';
-      return;
-    }
-    list.innerHTML = _mgGenres.map((g, i) =>
-      `<span class="manage-genre-chip">${esc(g)}<button class="manage-genre-del" onclick="deleteCustomGenre(${i})" title="Remove ${esc(g)}">×</button></span>`
-    ).join('');
-  }
-  async function deleteCustomGenre(idx) {
-    const genre = _mgGenres[idx];
-    if (genre === undefined) return;
-    const updated = loadCustomGenres().filter(g => g !== genre);
-    saveCustomGenres(updated);
-    // Sync deletion to Supabase metadata row
-    try {
-      await fetch(`${SB_URL}/rest/v1/books`, {
-        method: 'POST',
-        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
-        body: JSON.stringify({ id: '__custom_genres__', tab: '__meta__', title: '__custom_genres__',
-          notes: JSON.stringify(updated) }),
-      });
-    } catch {}
-    renderManageGenresModal();
-    render('fiction');
-    render('nonfiction');
-  }
 </script>
-
-<!-- Manage genres modal -->
-<div class="manage-genres-overlay" id="manage-genres-overlay" onclick="if(event.target===this)closeManageGenres()">
-  <div class="manage-genres-dialog">
-    <div class="manage-genres-header">
-      <span class="manage-genres-title">Manage Custom Genres</span>
-      <button class="manage-genres-close" onclick="closeManageGenres()" title="Close">✕</button>
-    </div>
-    <p class="manage-genres-note">Only custom genres can be removed. Built-in genres cannot be deleted. Removing a genre from this list does not affect books that already have it.</p>
-    <div class="manage-genres-list" id="manage-genres-list"></div>
-  </div>
-</div>
 </body>
 </html>
