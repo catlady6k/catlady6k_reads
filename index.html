@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catlady6k's TBR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* PRIMARY ACCENT — Hot Pink / Magenta */
+    --accent:            #E8006A;
+    --accent-light:      #FF2D78;
+    --accent-dark:       #C0005A;
+    --accent-glow:       rgba(232, 0, 106, 0.20);
+    --accent-glow-strong:rgba(232, 0, 106, 0.42);
+
+    /* SECONDARY ACCENT — Deep Rose */
+    --clay:       #D45080;
+    --clay-light: #E870A0;
+    --clay-dark:  #A83060;
+    --clay-pale:  rgba(212, 80, 128, 0.14);
+
+    /* STATUS BADGES — solid fills, white text for contrast */
+    --status-inprogress-bg:     #7A4E00;
+    --status-inprogress-text:   #FFFFFF;
+    --status-inprogress-border: #B07A10;
+    --status-notstarted-bg:     #2E2848;
+    --status-notstarted-text:   #DDD8FF;
+    --status-notstarted-border: #524878;
+    --status-finished-bg:       #0A5230;
+    --status-finished-text:     #FFFFFF;
+    --status-finished-border:   #18884A;
+    --status-paused-bg:         #6A1818;
+    --status-paused-text:       #FFFFFF;
+    --status-paused-border:     #C03030;
+
+    /* DARK SURFACES — warm crimson-tinted */
+    --bg:           #1A0A0E;
+    --surface-1:    #2A1020;
+    --surface-2:    #321525;
+    --surface-3:    #3C1A2C;
+    --surface-hover:#481F34;
+    --border:       #5A2A40;
+    --border-mid:   #7A3A55;
+
+    /* TEXT */
+    --text-primary:   #F8EEF2;
+    --text-secondary: #D4A0B5;
+    --text-muted:     #C4849A;
+    --white: #ffffff;
+
+    /* GRAY SCALE — remapped to warm dark equivalents */
+    --gray-50:  #2A1020;
+    --gray-100: #321525;
+    --gray-200: #5A2A40;
+    --gray-300: #7A3A55;
+    --gray-400: #C4849A;
+    --gray-500: #D4A0B5;
+    --gray-600: #E0B8C8;
+    --gray-700: #EED0DC;
+    --gray-800: #F8EEF2;
+
+    --radius:    10px;
+    --shadow:    0 2px 10px rgba(0,0,0,0.5);
+    --shadow-md: 0 6px 28px rgba(0,0,0,0.6);
+  }
+
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: linear-gradient(160deg, #0D0408 0%, #1A0A0E 50%, #220C14 100%);
+    padding: 36px 24px 30px;
+    text-align: center;
+    color: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .app-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 120% at 50% 0%, rgba(232,0,106,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .app-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232,0,106,0.5), transparent);
+  }
+  .app-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    position: relative;
+    background: linear-gradient(135deg, #FFFFFF 30%, #FFB8D4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .app-header p { color: var(--text-muted); font-size: 0.88rem; letter-spacing: 0.4px; position: relative; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .tab-btn {
+    padding: 14px 28px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--text-muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.18s ease;
+    letter-spacing: 0.1px;
+  }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn.active { color: var(--accent-light); border-bottom-color: var(--accent); }
+
+  /* MAIN */
+  .main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 32px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* STATS BANNER */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    text-align: center;
+    border-top: 3px solid var(--accent);
+    transition: transform 0.15s, border-top-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-top-color: var(--accent-light); }
+  .stat-card.filterable { cursor: pointer; }
+  .stat-card.stat-active {
+    border-top-color: var(--accent-light);
+    box-shadow: 0 0 0 2px var(--accent), 0 4px 20px var(--accent-glow-strong);
+    transform: translateY(-2px);
+  }
+  .stat-card.stat-active .stat-number { color: var(--white); }
+  .stat-card.stat-active .stat-label  { color: rgba(255,255,255,0.75); }
+  .stat-number { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 4px; color: var(--accent-light); }
+  .stat-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; }
+
+  /* FILTER STRIP */
+  .filter-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 7px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--accent-dark);
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+  .filter-strip-label { color: var(--text-muted); }
+  .filter-badge {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .btn-filter-x {
+    background: none; border: none;
+    color: var(--text-muted); cursor: pointer;
+    font-size: 0.88rem; line-height: 1;
+    padding: 1px 5px; border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .btn-filter-x:hover { color: var(--accent-light); }
+  .btn-cross-tab {
+    margin-left: auto;
+    padding: 4px 12px;
+    background: none;
+    border: 1px solid var(--border-mid);
+    border-radius: 6px;
+    font-size: 0.78rem; font-weight: 600; font-family: inherit;
+    color: var(--text-secondary); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cross-tab:hover { background: var(--surface-3); border-color: var(--clay); color: var(--clay-light); }
+
+  /* CROSS-TAB PANEL */
+  .main.cross-tab-mode { display: none; }
+  .cross-tab-wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px 32px; }
+  .cross-tab-header {
+    display: flex; align-items: baseline;
+    justify-content: space-between;
+    padding: 18px 0 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cross-tab-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.15rem; font-weight: 700; color: var(--text-primary);
+  }
+  .cross-tab-title em { color: var(--accent-light); font-style: normal; }
+  .cross-tab-count { font-size: 0.8rem; color: var(--text-muted); margin-left: 10px; }
+  .btn-cross-tab-back {
+    padding: 6px 14px; background: none;
+    border: 1px solid var(--border-mid); border-radius: 7px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+  }
+  .btn-cross-tab-back:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--clay); }
+  .td-tab-pill {
+    display: inline-block;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 2px 9px; border-radius: 20px; white-space: nowrap;
+  }
+  .td-tab-fiction    { background: rgba(232,0,106,0.18); color: var(--accent-light); }
+  .td-tab-nonfiction { background: rgba(212,80,128,0.18); color: var(--clay-light); }
+  .status-pill {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 20px; font-size: 0.76rem; font-weight: 600; border: 1px solid;
+  }
+  .status-pill.s-inprogress { background-color: var(--status-inprogress-bg); color: var(--status-inprogress-text); border-color: var(--status-inprogress-border); }
+  .status-pill.s-notstarted { background-color: var(--status-notstarted-bg); color: var(--status-notstarted-text); border-color: var(--status-notstarted-border); }
+  .status-pill.s-finished   { background-color: var(--status-finished-bg);   color: var(--status-finished-text);   border-color: var(--status-finished-border); }
+  .status-pill.s-paused     { background-color: var(--status-paused-bg);     color: var(--status-paused-text);     border-color: var(--status-paused-border); }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: var(--surface-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-box::placeholder { color: var(--text-muted); }
+  .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  .btn-add {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    background: var(--accent);
+    color: white;
+    box-shadow: 0 2px 12px var(--accent-glow);
+  }
+  .btn-add:hover { background: var(--accent-light); box-shadow: 0 4px 20px var(--accent-glow-strong), 0 0 0 1px rgba(255,45,120,0.3); transform: translateY(-1px); }
+  .btn-add:active { transform: translateY(0); }
+
+  /* ADD BOOK FORM */
+  .add-form {
+    display: none;
+    background: var(--surface-1);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--clay-dark);
+    box-shadow: var(--shadow-md);
+  }
+  .add-form.open { display: block; }
+  .form-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 14px; color: var(--clay-light); }
+  .form-row { display: grid; grid-template-columns: 2fr 1.5fr 0.8fr 1fr auto; gap: 10px; align-items: end; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input[type="text"],
+  .form-group input[type="number"] {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    background: var(--surface-3);
+    color: var(--text-primary);
+  }
+  .form-group input::placeholder { color: var(--text-muted); }
+  .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); background: var(--surface-2); }
+  .pages-loading {
+    background: var(--surface-2) !important;
+    color: var(--text-muted) !important;
+    cursor: wait;
+    border-color: var(--clay) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23E07A5F' stroke-width='2.5'%3E%3Cpath d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'/%3E%3C/svg%3E") no-repeat right 10px center !important;
+    padding-right: 30px !important;
+  }
+  .owned-check { display: flex; align-items: center; gap: 7px; padding-bottom: 8px; font-size: 0.88rem; color: var(--text-secondary); font-weight: 500; cursor: pointer; }
+  .owned-check input[type="checkbox"] { width: 17px; height: 17px; cursor: pointer; accent-color: var(--accent); }
+  .btn-submit {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    background: var(--clay);
+    color: white;
+    box-shadow: 0 2px 10px var(--clay-pale);
+  }
+  .btn-submit:hover { background: var(--clay-light); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,80,128,0.35); }
+  .btn-submit:active { transform: translateY(0); }
+
+  /* TABLE */
+  .table-wrap { background: var(--surface-1); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  thead th {
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #E8C8D4;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    user-select: none;
+  }
+  th.sortable { cursor: pointer; transition: color 0.15s; }
+  th.sortable:hover { color: var(--white); }
+  th.sort-asc::after  { content: ' ↑'; color: var(--accent-light); }
+  th.sort-desc::after { content: ' ↓'; color: var(--accent-light); }
+  th.sort-sec-asc::after  { content: ' ↑'; color: var(--clay-light); opacity: 0.8; }
+  th.sort-sec-desc::after { content: ' ↓'; color: var(--clay-light); opacity: 0.8; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+  tbody tr:nth-child(even) { background: rgba(255,255,255,0.018); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-hover); }
+  td { padding: 11px 14px; vertical-align: middle; color: var(--text-primary); }
+  .td-title { font-weight: 600; min-width: 150px; }
+  .td-author { color: var(--text-secondary); min-width: 120px; }
+  .td-pages { color: var(--text-secondary); text-align: center; }
+  .td-date { color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
+  .td-owned { text-align: center; }
+  .owned-toggle {
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+    accent-color: var(--accent);
+    display: block;
+    margin: 0 auto;
+  }
+  .td-progress { min-width: 180px; }
+  .td-actions { text-align: right; white-space: nowrap; }
+
+  /* STATUS SELECT */
+  .status-select {
+    padding: 5px 26px 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: 1.5px solid;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    outline: none;
+    transition: opacity 0.15s, box-shadow 0.15s;
+  }
+  .status-select:hover { opacity: 0.82; }
+  .status-select:focus { box-shadow: 0 0 0 2px var(--accent-glow); }
+  .status-select.s-inprogress { background-color: var(--status-inprogress-bg); color: var(--status-inprogress-text); border-color: var(--status-inprogress-border); }
+  .status-select.s-notstarted { background-color: var(--status-notstarted-bg); color: var(--status-notstarted-text); border-color: var(--status-notstarted-border); }
+  .status-select.s-finished   { background-color: var(--status-finished-bg);   color: var(--status-finished-text);   border-color: var(--status-finished-border); }
+  .status-select.s-paused     { background-color: var(--status-paused-bg);     color: var(--status-paused-text);     border-color: var(--status-paused-border); }
+
+  /* DATE INPUT */
+  .date-input {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    outline: none;
+    background: var(--surface-3);
+    max-width: 140px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.55) brightness(1.3); cursor: pointer; }
+  .date-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+
+  /* PROGRESS BAR */
+  .progress-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .progress-bar-track { height: 6px; background: #3C1A2C; border-radius: 99px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.3s ease;
+    background: linear-gradient(90deg, #C0005A, #FF2D78);
+    box-shadow: 0 0 8px rgba(232,0,106,0.5);
+  }
+  .progress-controls { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .pages-read-input {
+    width: 72px; padding: 4px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    outline: none;
+    background: var(--surface-3);
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .pages-read-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); background: var(--surface-2); }
+  .progress-label { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+
+  /* GOODREADS BUTTON */
+  .btn-gr {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(232,0,106,0.1);
+    border: 1.5px solid rgba(232,0,106,0.4);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: inherit;
+    color: #FF80B0;
+    cursor: pointer;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: all 0.16s ease;
+    white-space: nowrap;
+  }
+  .btn-gr:hover { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+  .td-gr { text-align: center; white-space: nowrap; }
+
+  /* INFO BUTTON */
+  .btn-info {
+    background: rgba(212,80,128,0.1);
+    border: 1.5px solid rgba(212,80,128,0.45);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: inherit;
+    color: #E870A0;
+    cursor: pointer;
+    transition: all 0.16s ease;
+    line-height: 1;
+  }
+  .btn-info:hover { background: var(--clay); color: white; border-color: var(--clay); box-shadow: 0 0 10px var(--clay-pale); }
+  .btn-info.open { background: var(--clay); color: white; border-color: var(--clay); }
+
+  /* SUMMARY ROW */
+  .summary-row > td {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--clay-dark) !important;
+    background: rgba(224,122,95,0.06);
+  }
+  .summary-panel {
+    padding: 14px 20px 16px;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .summary-panel-icon { font-size: 1rem; margin-top: 2px; flex-shrink: 0; opacity: 0.55; }
+  .summary-loading { display: flex; align-items: center; gap: 10px; padding: 14px 20px; color: var(--text-secondary); font-size: 0.85rem; font-style: italic; }
+  .summary-notfound { color: var(--text-secondary); font-style: italic; }
+  .summary-notfound a { color: var(--accent-light); text-underline-offset: 2px; }
+  .spinner {
+    width: 14px; height: 14px; flex-shrink: 0;
+    border: 2px solid var(--border-mid);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* STAR RATING */
+  .td-rating { white-space: nowrap; }
+  .star-row { display: inline-flex; }
+  .star-btn {
+    background: none;
+    border: none;
+    padding: 1px 3px;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #6A2840;
+    transition: color 0.1s, transform 0.12s, text-shadow 0.12s;
+    font-family: inherit;
+  }
+  .star-btn.filled {
+    color: #FF2D78;
+    text-shadow: 0 0 10px rgba(232,0,106,0.75), 0 0 22px rgba(232,0,106,0.35);
+  }
+  .star-btn:hover { color: #FF2D78; transform: scale(1.25); text-shadow: 0 0 14px rgba(232,0,106,0.9); }
+  .rating-empty { color: #3C1A2C; font-size: 0.9rem; letter-spacing: 1px; user-select: none; }
+
+  /* DELETE BUTTON */
+  .btn-delete {
+    background: none;
+    border: 1px solid var(--border-mid);
+    border-radius: 6px;
+    padding: 4px 9px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .btn-delete:hover { border-color: rgba(255,60,60,0.5); color: #FF7070; background: rgba(255,60,60,0.08); }
+
+  /* EMPTY STATE */
+  .empty-state { padding: 56px 24px; text-align: center; }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 14px; line-height: 1; }
+  .empty-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: var(--accent-light); }
+  .empty-sub { color: var(--text-muted); font-size: 0.9rem; }
+
+  /* YEAR STATS SECTION */
+  .year-section { max-width: 1200px; margin: 0 auto; padding: 0 16px 48px; }
+  .year-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .year-section-title::before,
+  .year-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .year-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .year-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border-left: 4px solid var(--clay);
+    transition: transform 0.15s, border-left-color 0.15s, box-shadow 0.15s, background 0.15s;
+    cursor: pointer;
+  }
+  .year-card:hover { transform: translateY(-2px); border-left-color: var(--clay-light); }
+  .year-card.year-active {
+    border-left-color: var(--accent);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 1px var(--accent-dark), 0 4px 20px var(--accent-glow);
+    transform: translateY(-2px);
+  }
+  .year-card.year-active .year-label { color: var(--white); }
+  .year-label { font-family: 'Playfair Display', Georgia, serif; font-size: 1.35rem; font-weight: 900; color: var(--accent-light); margin-bottom: 10px; }
+  .year-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 0.82rem; }
+  .year-row.yr-clickable {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 4px 7px;
+    margin: 1px -7px;
+    transition: background 0.12s;
+  }
+  .year-row.yr-clickable:hover { background: var(--surface-3); }
+  .year-row.yr-active { background: var(--surface-3); }
+  .year-row.yr-active .year-row-label { color: var(--text-primary); font-weight: 600; }
+  .year-row-label { color: var(--text-muted); }
+  .year-fiction-val { font-weight: 700; color: var(--accent-light); }
+  .year-nonfiction-val { font-weight: 700; color: var(--clay-light); }
+  .year-total-val { font-weight: 800; color: var(--text-primary); }
+  .year-divider { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+  .year-empty {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-style: italic;
+    text-align: center;
+    padding: 28px 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  /* YEAR DRILL PANEL */
+  .year-drill-wrap {
+    margin-top: 16px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-top: 3px solid var(--accent);
+    overflow: hidden;
+  }
+  .year-drill-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px 11px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .year-drill-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .year-drill-title em { color: var(--accent-light); font-style: normal; }
+  .year-drill-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-left: 8px; }
+  .btn-year-close {
+    background: none; border: none;
+    color: var(--text-muted); cursor: pointer;
+    font-size: 1rem; line-height: 1;
+    padding: 4px 8px; border-radius: 5px;
+    transition: color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .btn-year-close:hover { color: var(--text-primary); background: var(--surface-3); }
+  .year-drill-list { max-height: 440px; overflow-y: auto; }
+  .year-drill-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .year-drill-row:last-child { border-bottom: none; }
+  .year-drill-row:hover { background: var(--surface-hover); }
+  .year-drill-info { flex: 1; min-width: 0; }
+  .year-drill-book-title { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .year-drill-author { color: var(--text-muted); font-size: 0.78rem; margin-top: 1px; }
+  .year-drill-stars { color: var(--accent-light); letter-spacing: 1px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
+  .year-drill-empty { padding: 28px 18px; text-align: center; color: var(--text-muted); font-size: 0.88rem; font-style: italic; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app-header h1 { font-size: 1.5rem; }
+    .stats-banner { grid-template-columns: repeat(2, 1fr); }
+    .form-row { grid-template-columns: 1fr 1fr; }
+    .form-row .form-group:first-child { grid-column: 1 / -1; }
+    .form-row .btn-submit { grid-column: 1 / -1; width: 100%; padding: 11px; }
+    .tab-btn { padding: 12px 16px; font-size: 0.88rem; }
+
+    .table-scroll table,
+    .table-scroll thead,
+    .table-scroll tbody,
+    .table-scroll th,
+    .table-scroll td,
+    .table-scroll tr { display: block; }
+    .table-scroll thead tr { display: none; }
+    .table-scroll tbody tr { padding: 14px 16px; border-bottom: 1px solid var(--border); position: relative; }
+    .table-scroll tbody td { padding: 4px 0 4px 110px; font-size: 0.88rem; min-width: unset; border: none; position: relative; }
+    .table-scroll tbody td::before { content: attr(data-label); position: absolute; left: 0; width: 105px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); top: 50%; transform: translateY(-50%); }
+    .td-title { font-size: 1rem; padding-left: 0 !important; }
+    .td-title::before { display: none !important; }
+    .td-actions { padding-left: 0 !important; margin-top: 8px; }
+    .td-actions::before { display: none !important; }
+    .td-progress { min-width: unset; }
+    .pages-read-input { width: 65px; }
+    .year-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 400px) {
+    .stat-card { padding: 12px 10px; }
+    .stat-number { font-size: 1.4rem; }
+    .main { padding: 16px 10px 24px; }
+    .year-section { padding: 0 10px 32px; }
+    .year-grid { grid-template-columns: 1fr; }
+  }
+
+  /* =====================================================
+     TOUCH / MOBILE INTERACTION FIXES
+     ===================================================== */
+
+  /* Eliminate 300ms tap delay on all interactive elements.
+     touch-action: manipulation disables double-tap-to-zoom
+     so browsers fire click immediately on touch. */
+  button, a, select, input, label,
+  .stat-card.filterable,
+  .year-card, .year-row.yr-clickable {
+    touch-action: manipulation;
+  }
+
+  /* Prevent long-press text-selection from swallowing taps on card elements */
+  .stat-card.filterable,
+  .year-card,
+  .year-row.yr-clickable {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* iOS momentum scrolling on overflow containers */
+  .year-drill-list,
+  .table-scroll,
+  .cross-tab-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* =====================================================
+     NEW FEATURES
+     ===================================================== */
+
+  /* Form: add genre column */
+  .form-row { grid-template-columns: 2fr 1.5fr 0.8fr 1fr 1fr auto !important; }
+
+  /* Title cell with inline cover + genre */
+  .title-cell { display: flex; align-items: flex-start; gap: 9px; min-width: 180px; }
+  .title-cell-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+  /* Book cover thumbnail */
+  .book-cover-thumb {
+    width: 34px; height: 48px; flex-shrink: 0;
+    border-radius: 3px; overflow: hidden;
+    background: var(--surface-3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .book-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover-placeholder { background: linear-gradient(135deg, var(--surface-3), var(--surface-hover)); }
+  .cover-letter {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1rem; font-weight: 900; color: var(--accent-light); user-select: none;
+  }
+
+  /* Genre tag (inline in title cell) */
+  .genre-tag {
+    display: inline-block;
+    background: rgba(212,80,128,0.15); color: var(--clay-light);
+    border: 1px solid rgba(212,80,128,0.3); border-radius: 20px;
+    padding: 1px 7px; font-size: 0.67rem; font-weight: 600;
+    letter-spacing: 0.2px; white-space: nowrap;
+    max-width: 110px; overflow: hidden; text-overflow: ellipsis;
+    cursor: default;
+  }
+
+  /* Genre filter bar */
+  .genre-filter-bar {
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    margin-bottom: 14px; font-size: 0.78rem;
+  }
+  .genre-filter-label { color: var(--text-muted); font-weight: 600; margin-right: 2px; }
+  .btn-genre {
+    padding: 3px 10px;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600; font-family: inherit;
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .btn-genre:hover { border-color: var(--clay); color: var(--clay-light); }
+  .btn-genre.btn-genre-active { background: var(--clay-dark); border-color: var(--clay); color: var(--white); }
+
+  /* Reading goal bar */
+  .goal-bar-section { max-width: 1200px; margin: 0 auto; padding: 4px 16px 20px; }
+  .goal-bar-empty { text-align: center; padding: 10px 0; }
+  .btn-goal-set {
+    background: none; border: 1px dashed var(--border-mid); border-radius: 8px;
+    padding: 6px 18px; font-size: 0.8rem; color: var(--text-muted);
+    cursor: pointer; font-family: inherit; transition: all 0.15s; touch-action: manipulation;
+  }
+  .btn-goal-set:hover { border-color: var(--accent); color: var(--accent-light); }
+  .goal-bar-wrap {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 18px;
+  }
+  .goal-bar-wrap.goal-done { border-color: var(--status-finished-border); }
+  .goal-bar-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 9px; }
+  .goal-year { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .goal-progress-text { font-size: 0.88rem; color: var(--text-secondary); }
+  .goal-progress-text strong { font-size: 1.05rem; color: var(--accent-light); }
+  .goal-target { cursor: pointer; text-decoration: underline dotted; color: var(--text-muted); transition: color 0.15s; }
+  .goal-target:hover { color: var(--accent-light); }
+  .goal-bar-track { height: 7px; background: var(--surface-3); border-radius: 99px; overflow: hidden; }
+  .goal-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
+    box-shadow: 0 0 8px var(--accent-glow); transition: width 0.4s ease;
+  }
+  .goal-bar-wrap.goal-done .goal-bar-fill {
+    background: linear-gradient(90deg, #18884A, #30CC70);
+    box-shadow: 0 0 8px rgba(24,136,74,0.4);
+  }
+
+  /* Random pick button + banner */
+  .btn-random {
+    padding: 10px 16px; border: 1.5px solid var(--border-mid); border-radius: 8px;
+    font-size: 0.9rem; font-weight: 600; font-family: inherit;
+    background: var(--surface-2); color: var(--text-secondary);
+    cursor: pointer; transition: all 0.18s; white-space: nowrap; touch-action: manipulation;
+  }
+  .btn-random:hover { border-color: var(--accent); color: var(--accent-light); background: var(--surface-3); }
+  .pick-banner-wrap { overflow: hidden; }
+  .pick-banner {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface-2); border: 1px solid var(--accent-dark);
+    border-radius: 8px; padding: 8px 14px; margin-bottom: 12px;
+    font-size: 0.85rem; color: var(--text-secondary);
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  .pick-banner strong { color: var(--accent-light); }
+
+  /* Picked row glow */
+  @keyframes glowPulse {
+    0%,100% { box-shadow: inset 0 0 0 2px var(--accent-dark); background: var(--surface-hover); }
+    50%      { box-shadow: inset 0 0 0 2px var(--accent), 0 0 18px var(--accent-glow-strong); background: rgba(232,0,106,0.08); }
+  }
+  tr.row-picked { animation: glowPulse 1.6s ease infinite; }
+  .book-card.card-picked { animation: glowPulse 1.6s ease infinite; border-color: var(--accent) !important; }
+
+  /* Row enter / exit animations */
+  @keyframes trSlideIn  { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes trSlideOut { from { opacity:1; } to { opacity:0; transform:translateY(-6px); } }
+  tr.tr-new td { animation: trSlideIn 190ms ease forwards; }
+  tr.tr-exit   { animation: trSlideOut 160ms ease forwards; pointer-events: none; }
+  .book-card.card-new  { animation: trSlideIn 190ms ease forwards; }
+  .book-card.card-exit { animation: trSlideOut 160ms ease forwards; pointer-events: none; overflow: hidden; }
+
+  /* Notes button + row */
+  .btn-notes {
+    background: rgba(212,80,128,0.1); border: 1.5px solid rgba(212,80,128,0.35);
+    border-radius: 6px; padding: 3px 8px;
+    font-size: 0.8rem; font-weight: 700; font-family: inherit;
+    color: #E870A0; cursor: pointer; transition: all 0.16s; line-height: 1;
+  }
+  .btn-notes:hover, .btn-notes.active { background: var(--clay); color: white; border-color: var(--clay); }
+  .notes-row > td {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--clay-dark) !important;
+    background: rgba(212,80,128,0.04);
+  }
+  .notes-wrap { padding: 10px 18px 14px; }
+  .notes-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--clay-light); margin-bottom: 6px; }
+  .notes-textarea {
+    width: 100%; min-height: 76px;
+    background: var(--surface-3); color: var(--text-primary);
+    border: 1.5px solid var(--border); border-radius: 7px;
+    padding: 9px 12px; font-size: 0.88rem; font-family: inherit;
+    resize: vertical; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .notes-textarea:focus { border-color: var(--clay); box-shadow: 0 0 0 2px rgba(212,80,128,0.18); }
+
+  /* Mobile book cards */
+  .card-list { display: flex; flex-direction: column; gap: 10px; }
+  .book-card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px; transition: border-color 0.15s;
+  }
+  .card-top { display: flex; gap: 10px; align-items: flex-start; }
+  .card-info { flex: 1; min-width: 0; }
+  .card-title { font-weight: 700; font-size: 0.96rem; color: var(--text-primary); line-height: 1.3; margin-bottom: 2px; }
+  .card-author { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 5px; }
+  .card-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .card-bottom { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .card-progress { margin-top: 6px; }
+  .card-footer {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px; padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+  .card-notes-area { margin-top: 8px; }
+
+  /* ---- COARSE-POINTER (TOUCH) ONLY FIXES ---- */
+  /* These enlarge touch targets without affecting desktop layout */
+  @media (pointer: coarse) {
+
+    /* Stat filter cards — already large enough visually, but ensure tap feedback */
+    .stat-card.filterable:active { transform: scale(0.97); }
+
+    /* Status select — needs at least 44px height */
+    .status-select {
+      min-height: 44px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      font-size: 0.85rem;
+    }
+
+    /* Star rating — expand each star to a 44px touch target */
+    .star-btn {
+      min-width: 36px;
+      min-height: 44px;
+      padding: 0 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    /* GR / info / delete action buttons — expand to 44px height */
+    .btn-gr,
+    .btn-info,
+    .btn-delete {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+    }
+
+    /* Filter strip clear (✕) button */
+    .btn-filter-x {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+      font-size: 1rem;
+    }
+
+    /* Cross-tab "Show All Tabs" and "← Back" buttons */
+    .btn-cross-tab,
+    .btn-cross-tab-back {
+      min-height: 44px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Year drill close button */
+    .btn-year-close {
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 1.1rem;
+    }
+
+    /* Util bar export/import buttons */
+    .btn-util {
+      min-height: 44px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* Tab bar buttons */
+    .tab-btn { min-height: 48px; }
+
+    /* Add book button */
+    .btn-add, .btn-submit { min-height: 44px; }
+
+    /* Owned checkbox — wrap in a larger tap zone via increased size */
+    .owned-toggle {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Pages-read input — larger on touch */
+    .pages-read-input {
+      min-height: 44px;
+      width: 80px;
+      font-size: 1rem;
+      padding: 0 10px;
+    }
+
+    /* Date input */
+    .date-input {
+      min-height: 44px;
+      padding: 0 10px;
+      font-size: 0.88rem;
+    }
+
+    /* Year drill list — taller allowed, scrollable */
+    .year-drill-list { max-height: 60vh; }
+
+    /* Year sub-rows — ensure easy tap height */
+    .year-row.yr-clickable { min-height: 44px; align-items: center; }
+
+    /* Filter strip — wrap on small screens */
+    .filter-strip { flex-wrap: wrap; row-gap: 6px; }
+  }
+
+  /* UTIL BAR */
+  .util-bar {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .util-bar::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .util-bar::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .btn-util {
+    padding: 7px 16px;
+    border: 1px solid var(--border-mid);
+    border-radius: 7px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+  }
+  .btn-util:hover {
+    background: var(--surface-2);
+    border-color: var(--border-mid);
+    color: var(--text-secondary);
+  }
+  .btn-util svg { vertical-align: -3px; margin-right: 5px; opacity: 0.75; }
+  .import-feedback {
+    font-size: 0.78rem;
+    color: #18884A;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .import-feedback.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>📚 Catlady6k's Reads</h1>
+  <p>Your personal to-be-read list</p>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('fiction')" id="tab-fiction">Fiction</button>
+  <button class="tab-btn" onclick="switchTab('nonfiction')" id="tab-nonfiction">Non-Fiction</button>
+</div>
+
+<div class="main">
+  <!-- genre datalist (shared) -->
+  <datalist id="genre-suggestions">
+    <option value="Literary Fiction"><option value="Sci-Fi"><option value="Fantasy">
+    <option value="Mystery"><option value="Thriller"><option value="Romance">
+    <option value="Horror"><option value="Historical Fiction"><option value="Memoir">
+    <option value="Biography"><option value="History"><option value="Science">
+    <option value="Self-Help"><option value="Philosophy"><option value="Essays">
+    <option value="Graphic Novel"><option value="Poetry"><option value="Other">
+  </datalist>
+
+  <!-- FICTION PANEL -->
+  <div class="tab-panel active" id="panel-fiction">
+    <div class="stats-banner" id="stats-fiction"></div>
+    <div id="filter-strip-fiction"></div>
+    <div id="genre-filter-fiction"></div>
+    <div class="pick-banner-wrap" id="pick-banner-fiction"></div>
+    <div class="toolbar">
+      <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('fiction', this.value)" id="search-fiction">
+      <button class="btn-random" onclick="pickRandom('fiction')">🎲 Random Pick</button>
+      <button class="btn-add" onclick="toggleForm('fiction')">+ Add Book</button>
+    </div>
+    <div class="add-form" id="form-fiction">
+      <div class="form-title">Add New Book</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="f-title" placeholder="Book title" onkeydown="formKeydown(event,'fiction')" onblur="autofillPages('fiction')">
+        </div>
+        <div class="form-group">
+          <label>Author</label>
+          <input type="text" id="f-author" placeholder="Author name" onkeydown="formKeydown(event,'fiction')" onblur="autofillPages('fiction')">
+        </div>
+        <div class="form-group">
+          <label>Pages</label>
+          <input type="number" id="f-pages" placeholder="e.g. 336" min="1" onkeydown="formKeydown(event,'fiction')" oninput="pageFetchState.fiction=null">
+        </div>
+        <div class="form-group">
+          <label>Genre</label>
+          <input type="text" id="f-genre" list="genre-suggestions" placeholder="e.g. Sci-Fi" onkeydown="formKeydown(event,'fiction')">
+        </div>
+        <div class="form-group">
+          <label>Owned?</label>
+          <label class="owned-check">
+            <input type="checkbox" id="f-owned"> Yes, I own it
+          </label>
+        </div>
+        <button class="btn-submit" onclick="addBook('fiction')">Add Book</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll" id="table-fiction"></div>
+    </div>
+  </div>
+
+  <!-- NON-FICTION PANEL -->
+  <div class="tab-panel" id="panel-nonfiction">
+    <div class="stats-banner" id="stats-nonfiction"></div>
+    <div id="filter-strip-nonfiction"></div>
+    <div id="genre-filter-nonfiction"></div>
+    <div class="pick-banner-wrap" id="pick-banner-nonfiction"></div>
+    <div class="toolbar">
+      <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('nonfiction', this.value)" id="search-nonfiction">
+      <button class="btn-random" onclick="pickRandom('nonfiction')">🎲 Random Pick</button>
+      <button class="btn-add" onclick="toggleForm('nonfiction')">+ Add Book</button>
+    </div>
+    <div class="add-form" id="form-nonfiction">
+      <div class="form-title">Add New Book</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="nf-title" placeholder="Book title" onkeydown="formKeydown(event,'nonfiction')" onblur="autofillPages('nonfiction')">
+        </div>
+        <div class="form-group">
+          <label>Author</label>
+          <input type="text" id="nf-author" placeholder="Author name" onkeydown="formKeydown(event,'nonfiction')" onblur="autofillPages('nonfiction')">
+        </div>
+        <div class="form-group">
+          <label>Pages</label>
+          <input type="number" id="nf-pages" placeholder="e.g. 256" min="1" onkeydown="formKeydown(event,'nonfiction')" oninput="pageFetchState.nonfiction=null">
+        </div>
+        <div class="form-group">
+          <label>Genre</label>
+          <input type="text" id="nf-genre" list="genre-suggestions" placeholder="e.g. Memoir" onkeydown="formKeydown(event,'nonfiction')">
+        </div>
+        <div class="form-group">
+          <label>Owned?</label>
+          <label class="owned-check">
+            <input type="checkbox" id="nf-owned"> Yes, I own it
+          </label>
+        </div>
+        <button class="btn-submit" onclick="addBook('nonfiction')">Add Book</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll" id="table-nonfiction"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CROSS-TAB COMBINED VIEW -->
+<div id="cross-tab-panel"></div>
+
+<!-- READING GOAL -->
+<div id="goal-bar" class="goal-bar-section"></div>
+
+<!-- YEAR STATS -->
+<div class="year-section">
+  <div class="year-section-title">Books Finished by Year</div>
+  <div id="year-stats-content"></div>
+  <div id="year-drill-panel"></div>
+</div>
+
+<!-- UTIL BAR -->
+<div class="util-bar">
+  <button class="btn-util" onclick="exportData()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export backup
+  </button>
+  <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(this.files[0])">
+  <button class="btn-util" onclick="triggerImport()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="5" x2="12" y2="17"/></svg>
+    Import backup
+  </button>
+  <span class="import-feedback" id="import-feedback">✓ Data restored</span>
+</div>
+
+<script>
+  const STATUSES = ['Not Started', 'In Progress', 'Finished', 'Paused'];
+  const STATUS_CLS = {
+    'In Progress': 's-inprogress',
+    'Not Started': 's-notstarted',
+    'Finished':    's-finished',
+    'Paused':      's-paused'
+  };
+  const STATUS_ORDER = { 'In Progress': 0, 'Not Started': 1, 'Finished': 2, 'Paused': 3 };
+
+  const STORAGE_KEYS = { fiction: 'tbr_fiction', nonfiction: 'tbr_nonfiction' };
+  const SORT_KEYS    = { fiction: 'tbr_sort_fiction', nonfiction: 'tbr_sort_nonfiction' };
+
+  let searchQuery    = { fiction: '', nonfiction: '' };
+  let statFilter     = { fiction: null, nonfiction: null };
+  let genreFilter    = { fiction: null, nonfiction: null };
+  let crossTabView   = null;
+  let activeYearView = null;
+  let activeSummary  = null;
+  let activeNotes    = null; // { id, tab }
+  let randomPickId   = { fiction: null, nonfiction: null };
+  let justAddedId    = null; // set briefly during addBook for slide-in animation
+  let pageFetchState = { fiction: null, nonfiction: null };
+  const SUMMARY_PREFIX = 'tbr_sum_';
+  const COVER_PREFIX   = 'tbr_cover_';
+  const GOAL_KEY       = 'tbr_goal_';
+  const coverFetchPending = new Set();
+
+  function getSummaryCache(id) {
+    try { const v = localStorage.getItem(SUMMARY_PREFIX + id); return v !== null ? v : undefined; }
+    catch { return undefined; }
+  }
+  function setSummaryCache(id, text) {
+    try { localStorage.setItem(SUMMARY_PREFIX + id, text); } catch {}
+  }
+
+  function loadBooks(tab) {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEYS[tab])) || []; }
+    catch { return []; }
+  }
+  function saveBooks(tab, books) { localStorage.setItem(STORAGE_KEYS[tab], JSON.stringify(books)); }
+  function loadSortState(tab) {
+    try { return JSON.parse(localStorage.getItem(SORT_KEYS[tab])) || { col: null, dir: 'asc' }; }
+    catch { return { col: null, dir: 'asc' }; }
+  }
+  function saveSortState(tab, state) { localStorage.setItem(SORT_KEYS[tab], JSON.stringify(state)); }
+  function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+  function today() { return new Date().toISOString().slice(0, 10); }
+
+  /* ---- SORT ---- */
+  function sortBooks(books, col, dir, statusDir) {
+    const sorted = [...books];
+    sorted.sort((a, b) => {
+      // Primary: always status
+      const ao = STATUS_ORDER[a.status] ?? 9, bo = STATUS_ORDER[b.status] ?? 9;
+      if (ao !== bo) return statusDir === 'desc' ? bo - ao : ao - bo;
+
+      // Secondary: user-selected column (skip if none or if status was clicked)
+      if (col && col !== 'status') {
+        let av = a[col], bv = b[col];
+        if (col === 'pages' || col === 'pagesRead' || col === 'rating') { av = Number(av) || 0; bv = Number(bv) || 0; }
+        else if (col === 'owned') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+        else { av = (av || '').toString().toLowerCase(); bv = (bv || '').toString().toLowerCase(); }
+        if (av < bv) return dir === 'asc' ? -1 : 1;
+        if (av > bv) return dir === 'asc' ? 1 : -1;
+      }
+
+      // Final tiebreaker: title
+      return a.title.localeCompare(b.title);
+    });
+    return sorted;
+  }
+
+  /* ---- STAT FILTER ---- */
+  function setStatFilter(tab, status) {
+    // Clicking the same card again clears; Total Books (null) always clears
+    statFilter[tab] = (status !== null && statFilter[tab] === status) ? null : status;
+    if (crossTabView) closeCrossTab();
+    render(tab);
+  }
+
+  function renderStatFilter(tab) {
+    const el = document.getElementById('filter-strip-' + tab);
+    if (!el) return;
+    const f = statFilter[tab];
+    if (!f) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="filter-strip">
+      <span class="filter-strip-label">Filtering:</span>
+      <span class="filter-badge">${esc(f)}</span>
+      <button class="btn-filter-x" onclick="setStatFilter('${tab}', null)" title="Clear filter">✕</button>
+      <button class="btn-cross-tab" onclick="showCrossTab('${esc(f)}')">Show All Tabs ↗</button>
+    </div>`;
+  }
+
+  /* ---- CROSS-TAB COMBINED VIEW ---- */
+  function showCrossTab(status) {
+    crossTabView = status;
+    document.querySelector('.main').classList.add('cross-tab-mode');
+    renderCrossTabPanel(status);
+  }
+
+  function closeCrossTab() {
+    crossTabView = null;
+    document.querySelector('.main').classList.remove('cross-tab-mode');
+    document.getElementById('cross-tab-panel').innerHTML = '';
+  }
+
+  function renderCrossTabPanel(status) {
+    const panel = document.getElementById('cross-tab-panel');
+    const allBooks = [
+      ...loadBooks('fiction').filter(b => b.status === status).map(b => ({ ...b, _tab: 'fiction' })),
+      ...loadBooks('nonfiction').filter(b => b.status === status).map(b => ({ ...b, _tab: 'nonfiction' }))
+    ].sort((a, b) => a.title.localeCompare(b.title));
+    const count = allBooks.length;
+
+    const rows = allBooks.map(b => {
+      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + b.author).trim());
+      const tabPill = `<span class="td-tab-pill td-tab-${b._tab}">${b._tab === 'fiction' ? 'Fiction' : 'Non-Fiction'}</span>`;
+      const starHTML = b.status === 'Finished'
+        ? (b.rating
+            ? `<span style="color:var(--accent-light);letter-spacing:1px">${'★'.repeat(b.rating)}${'☆'.repeat(5 - b.rating)}</span>`
+            : `<span class="rating-empty">✩✩✩✩✩</span>`)
+        : `<span style="color:var(--gray-300)">—</span>`;
+      return `<tr>
+        <td>${tabPill}</td>
+        <td class="td-title">${esc(b.title)}</td>
+        <td class="td-author">${esc(b.author)}</td>
+        <td class="td-pages" style="text-align:center">${b.pages || '—'}</td>
+        <td><span class="status-pill ${STATUS_CLS[b.status] || 's-notstarted'}">${esc(b.status)}</span></td>
+        <td class="td-rating">${starHTML}</td>
+        <td class="td-owned" style="text-align:center">
+          <input type="checkbox" class="owned-toggle" ${b.owned ? 'checked' : ''}
+            data-id="${b.id}" data-tab="${b._tab}" onchange="toggleOwned(this)"
+            title="${b.owned ? 'Owned' : 'Not owned'}">
+        </td>
+        <td><a class="btn-gr" href="${grUrl}" target="_blank" rel="noopener noreferrer">GR</a></td>
+      </tr>`;
+    }).join('');
+
+    const tableHTML = count === 0
+      ? `<div class="empty-state"><div class="empty-icon">📖</div>
+           <div class="empty-title">No "${esc(status)}" books yet.</div></div>`
+      : `<div class="table-scroll"><table>
+           <thead><tr>
+             <th>List</th><th>Title</th><th>Author</th><th>Pages</th>
+             <th>Status</th><th>Rating</th><th>Owned</th><th>GR</th>
+           </tr></thead>
+           <tbody>${rows}</tbody>
+         </table></div>`;
+
+    panel.innerHTML = `<div class="cross-tab-wrap">
+      <div class="cross-tab-header">
+        <div>
+          <span class="cross-tab-title">All <em>${esc(status)}</em> Books</span>
+          <span class="cross-tab-count">${count} book${count !== 1 ? 's' : ''} across both lists</span>
+        </div>
+        <button class="btn-cross-tab-back" onclick="closeCrossTab()">← Back to tab view</button>
+      </div>
+      ${tableHTML}
+    </div>`;
+  }
+
+  /* ---- RENDER ---- */
+  function render(tab) {
+    const books = loadBooks(tab);
+    const sortState = loadSortState(tab);
+    const q = (searchQuery[tab] || '').toLowerCase();
+    let filtered = q
+      ? books.filter(b => b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q))
+      : books;
+    if (statFilter[tab])  filtered = filtered.filter(b => b.status === statFilter[tab]);
+    if (genreFilter[tab]) filtered = filtered.filter(b => b.genre === genreFilter[tab]);
+    const sorted = sortBooks(filtered, sortState.col, sortState.dir, sortState.statusDir || 'asc');
+    renderStats(tab, books);
+    renderStatFilter(tab);
+    renderGenreFilter(tab);
+    renderTable(tab, sorted, sortState);
+    renderYearStats();
+    renderGoalBar();
+    if (crossTabView) renderCrossTabPanel(crossTabView);
+  }
+
+  function renderStats(tab, books) {
+    const total = books.length;
+    const inProgress = books.filter(b => b.status === 'In Progress').length;
+    const finished   = books.filter(b => b.status === 'Finished').length;
+    const pagesRead  = books.reduce((sum, b) =>
+      sum + (b.status === 'Finished' ? (Number(b.pages) || 0) : (Number(b.pagesRead) || 0)), 0);
+    const f = statFilter[tab];
+    document.getElementById('stats-' + tab).innerHTML = `
+      <div class="stat-card filterable" onclick="setStatFilter('${tab}', null)" title="Show all books">
+        <div class="stat-number">${total}</div><div class="stat-label">Total Books</div>
+      </div>
+      <div class="stat-card filterable${f === 'In Progress' ? ' stat-active' : ''}" onclick="setStatFilter('${tab}', 'In Progress')" title="Filter: In Progress">
+        <div class="stat-number">${inProgress}</div><div class="stat-label">In Progress</div>
+      </div>
+      <div class="stat-card filterable${f === 'Finished' ? ' stat-active' : ''}" onclick="setStatFilter('${tab}', 'Finished')" title="Filter: Finished">
+        <div class="stat-number">${finished}</div><div class="stat-label">Finished</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${pagesRead.toLocaleString()}</div><div class="stat-label">Pages Read</div>
+      </div>
+    `;
+  }
+
+  function renderYearStats() {
+    const yearMap = {};
+    ['fiction', 'nonfiction'].forEach(tab => {
+      loadBooks(tab)
+        .filter(b => b.status === 'Finished' && b.dateFinished && /^\d{4}/.test(b.dateFinished))
+        .forEach(b => {
+          const y = b.dateFinished.slice(0, 4);
+          if (!yearMap[y]) yearMap[y] = { fiction: 0, nonfiction: 0 };
+          yearMap[y][tab]++;
+        });
+    });
+    const years = Object.keys(yearMap).sort((a, b) => b - a);
+    const el = document.getElementById('year-stats-content');
+    if (years.length === 0) {
+      el.innerHTML = '<div class="year-empty">No finished books yet — mark books as Finished with a date to see your year-by-year progress.</div>';
+      if (activeYearView) closeYearView();
+      return;
+    }
+    el.innerHTML = `<div class="year-grid">${years.map(y => {
+      const f = yearMap[y].fiction, n = yearMap[y].nonfiction, t = f + n;
+      const isActive = activeYearView && activeYearView.year === y;
+      const rowActive = (rowTab) => isActive && activeYearView.tab === rowTab;
+      return `<div class="year-card${isActive && activeYearView.tab === null ? ' year-active' : ''}" onclick="openYearView('${y}', null)">
+        <div class="year-label">${y}</div>
+        <div class="year-row yr-clickable${rowActive('fiction') ? ' yr-active' : ''}" onclick="event.stopPropagation(); openYearView('${y}', 'fiction')">
+          <span class="year-row-label">Fiction</span><span class="year-fiction-val">${f}</span>
+        </div>
+        <div class="year-row yr-clickable${rowActive('nonfiction') ? ' yr-active' : ''}" onclick="event.stopPropagation(); openYearView('${y}', 'nonfiction')">
+          <span class="year-row-label">Non-Fiction</span><span class="year-nonfiction-val">${n}</span>
+        </div>
+        <hr class="year-divider">
+        <div class="year-row"><span class="year-row-label">Total</span><span class="year-total-val">${t}</span></div>
+      </div>`;
+    }).join('')}</div>`;
+    if (activeYearView) renderYearDrill(activeYearView.year, activeYearView.tab);
+  }
+
+  function openYearView(year, tab) {
+    // Toggle: clicking the same year+tab selection closes it
+    if (activeYearView && activeYearView.year === year && activeYearView.tab === tab) {
+      closeYearView();
+      return;
+    }
+    activeYearView = { year, tab };
+    renderYearStats();
+  }
+
+  function closeYearView() {
+    activeYearView = null;
+    renderYearStats();
+    document.getElementById('year-drill-panel').innerHTML = '';
+  }
+
+  function renderYearDrill(year, tab) {
+    const tabLabel = tab === 'fiction' ? 'Fiction' : tab === 'nonfiction' ? 'Non-Fiction' : 'All Books';
+    const books = [
+      ...loadBooks('fiction')
+        .filter(b => b.status === 'Finished' && b.dateFinished && b.dateFinished.startsWith(year))
+        .map(b => ({ ...b, _tab: 'fiction' })),
+      ...loadBooks('nonfiction')
+        .filter(b => b.status === 'Finished' && b.dateFinished && b.dateFinished.startsWith(year))
+        .map(b => ({ ...b, _tab: 'nonfiction' }))
+    ]
+      .filter(b => tab === null || b._tab === tab)
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    const count = books.length;
+    const rows = books.length === 0
+      ? `<div class="year-drill-empty">No books found for this selection.</div>`
+      : books.map(b => {
+          const pill = `<span class="td-tab-pill td-tab-${b._tab}">${b._tab === 'fiction' ? 'Fiction' : 'Non-Fiction'}</span>`;
+          const stars = b.rating
+            ? `<span class="year-drill-stars">${'★'.repeat(b.rating)}${'☆'.repeat(5 - b.rating)}</span>`
+            : `<span class="year-drill-stars" style="color:var(--border-mid)">✩✩✩✩✩</span>`;
+          return `<div class="year-drill-row">
+            ${pill}
+            <div class="year-drill-info">
+              <div class="year-drill-book-title">${esc(b.title)}</div>
+              <div class="year-drill-author">${esc(b.author || '—')}</div>
+            </div>
+            ${stars}
+          </div>`;
+        }).join('');
+
+    document.getElementById('year-drill-panel').innerHTML = `
+      <div class="year-drill-wrap">
+        <div class="year-drill-header">
+          <div>
+            <span class="year-drill-title"><em>${year}</em> · ${tabLabel}</span>
+            <span class="year-drill-subtitle">${count} book${count !== 1 ? 's' : ''}</span>
+          </div>
+          <button class="btn-year-close" onclick="closeYearView()" title="Close">✕</button>
+        </div>
+        <div class="year-drill-list">${rows}</div>
+      </div>`;
+  }
+
+  function isMobile() { return window.innerWidth <= 768; }
+
+  function renderCoverCell(b) {
+    const cached = getCoverCache(b.id);
+    const letter = esc((b.title || '?').charAt(0).toUpperCase());
+    if (cached && cached !== 'none') {
+      return `<div class="book-cover-thumb" id="cover-${b.id}"><img src="https://covers.openlibrary.org/b/id/${cached}-S.jpg" alt="" class="book-cover-img" onerror="this.style.display='none';this.parentElement.classList.add('cover-placeholder');this.parentElement.innerHTML+='<span class=cover-letter>${letter}</span>'"></div>`;
+    }
+    return `<div class="book-cover-thumb cover-placeholder" id="cover-${b.id}"><span class="cover-letter">${letter}</span></div>`;
+  }
+
+  function renderTable(tab, books, sortState) {
+    const el = document.getElementById('table-' + tab);
+    if (books.length === 0) {
+      const q = searchQuery[tab] || genreFilter[tab];
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📖</div>
+        <div class="empty-title">${q ? 'No books match your filters.' : 'No books here yet.'}</div>
+        <div class="empty-sub">${q ? 'Try clearing a filter.' : 'Add your first one below!'}</div></div>`;
+      return;
+    }
+
+    if (isMobile()) { renderMobileCards(tab, books, el); return; }
+
+    const cols = [
+      { key: 'title',        label: 'Title',         cls: 'td-title',    sortable: true  },
+      { key: 'author',       label: 'Author',        cls: 'td-author',   sortable: true  },
+      { key: 'pages',        label: 'Pages',         cls: 'td-pages',    sortable: true  },
+      { key: 'status',       label: 'Status',        cls: '',            sortable: true  },
+      { key: 'dateFinished', label: 'Date Finished', cls: 'td-date',     sortable: false },
+      { key: 'rating',       label: 'Rating',        cls: 'td-rating',   sortable: true  },
+      { key: 'owned',        label: 'Owned',         cls: 'td-owned',    sortable: true  },
+      { key: 'pagesRead',    label: 'Progress',      cls: 'td-progress', sortable: false },
+      { key: 'goodreads',    label: 'GR',            cls: 'td-gr',       sortable: false },
+    ];
+
+    const thHTML = cols.map(c => {
+      let cls = c.sortable ? 'sortable' : '';
+      if (c.key === 'status') {
+        cls += (sortState.statusDir || 'asc') === 'asc' ? ' sort-asc' : ' sort-desc';
+      } else if (sortState.col === c.key) {
+        cls += sortState.dir === 'asc' ? ' sort-sec-asc' : ' sort-sec-desc';
+      }
+      return `<th class="${cls}" ${c.sortable ? `onclick="handleSort('${tab}','${c.key}')"` : ''}>${c.label}</th>`;
+    }).join('') + '<th></th>';
+
+    const rows = books.map(b => {
+      const pct = b.status === 'In Progress' && b.pages
+        ? Math.min(100, Math.round((Number(b.pagesRead) || 0) / Number(b.pages) * 100)) : 0;
+      const opts = STATUSES.map(s =>
+        `<option value="${s}"${b.status === s ? ' selected' : ''}>${s}</option>`).join('');
+      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + (b.author||'')).trim());
+
+      const progressCell = b.status === 'In Progress'
+        ? `<div class="progress-wrap">
+             <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+             <div class="progress-controls">
+               <input class="pages-read-input" type="number" inputmode="numeric" min="0" max="${b.pages || 9999}"
+                 value="${b.pagesRead || 0}" data-id="${b.id}" data-tab="${tab}" oninput="updatePagesRead(this)">
+               <span class="progress-label">${b.pagesRead || 0} / ${b.pages || '?'} pages — ${pct}%</span>
+             </div></div>`
+        : `<span style="color:var(--gray-300);font-size:0.8rem">—</span>`;
+
+      const dateCell = b.status === 'Finished'
+        ? `<input class="date-input" type="date" value="${b.dateFinished || ''}" data-id="${b.id}" data-tab="${tab}" onchange="updateDate(this)">`
+        : `<span style="color:var(--gray-300)">—</span>`;
+
+      const isPicked = randomPickId[tab] === b.id;
+      const isNew    = justAddedId === b.id;
+
+      const extraRows = [
+        activeSummary && activeSummary.id === b.id && activeSummary.tab === tab ? buildSummaryRow(b, tab) : '',
+        activeNotes   && activeNotes.id   === b.id && activeNotes.tab   === tab ? buildNotesRow(b, tab)   : '',
+      ].join('');
+
+      return `<tr data-book-id="${b.id}"${isPicked ? ' class="row-picked"' : isNew ? ' class="tr-new"' : ''}>
+        <td class="td-title" data-label="Title">
+          <div class="title-cell">
+            ${renderCoverCell(b)}
+            <div class="title-cell-text">
+              <span>${esc(b.title)}</span>
+              ${b.genre ? `<span class="genre-tag">${esc(b.genre)}</span>` : ''}
+            </div>
+          </div>
+        </td>
+        <td class="td-author" data-label="Author">${esc(b.author||'')}</td>
+        <td class="td-pages" data-label="Pages">${b.pages || '—'}</td>
+        <td data-label="Status">
+          <select class="status-select ${STATUS_CLS[b.status] || 's-notstarted'}"
+            data-id="${b.id}" data-tab="${tab}" onchange="changeStatus(this)">${opts}</select>
+        </td>
+        <td class="td-date" data-label="Date Finished">${dateCell}</td>
+        <td class="td-rating" data-label="Rating">${b.status === 'Finished'
+          ? `<div class="star-row">${[1,2,3,4,5].map(i =>
+              `<button class="star-btn${(b.rating||0)>=i?' filled':''}" data-id="${b.id}" data-tab="${tab}" data-star="${i}" onclick="setRating(this)">★</button>`
+            ).join('')}</div>`
+          : `<span class="rating-empty">✩✩✩✩✩</span>`
+        }</td>
+        <td class="td-owned" data-label="Owned">
+          <input type="checkbox" class="owned-toggle" ${b.owned ? 'checked' : ''}
+            data-id="${b.id}" data-tab="${tab}" onchange="toggleOwned(this)"
+            title="${b.owned ? 'Owned' : 'Not owned'}">
+        </td>
+        <td class="td-progress" data-label="Progress">${progressCell}</td>
+        <td class="td-gr" data-label="Goodreads">
+          <a class="btn-gr" href="${grUrl}" target="_blank" rel="noopener noreferrer">GR</a>
+        </td>
+        <td class="td-actions">
+          <button class="btn-info${activeSummary && activeSummary.id === b.id ? ' open' : ''}"
+            data-id="${b.id}" data-tab="${tab}" onclick="toggleSummary(this)" title="Book summary">ⓘ</button>
+          <button class="btn-notes${activeNotes && activeNotes.id === b.id ? ' active' : ''}"
+            data-id="${b.id}" data-tab="${tab}" onclick="toggleNotes(this)" title="Notes">✎</button>
+          <button class="btn-delete" data-id="${b.id}" data-tab="${tab}" onclick="deleteBook(this)">✕</button>
+        </td>
+      </tr>${extraRows}`;
+    }).join('');
+
+    el.innerHTML = `<table><thead><tr>${thHTML}</tr></thead><tbody>${rows}</tbody></table>`;
+
+    // Kick off cover fetches for any books not yet cached
+    books.forEach(b => { if (getCoverCache(b.id) === null) fetchCoverAsync(b.id, b.title, b.author); });
+  }
+
+  function renderMobileCards(tab, books, el) {
+    const cards = books.map(b => {
+      const pct = b.status === 'In Progress' && b.pages
+        ? Math.min(100, Math.round((Number(b.pagesRead)||0) / Number(b.pages) * 100)) : 0;
+      const opts = STATUSES.map(s =>
+        `<option value="${s}"${b.status===s?' selected':''}>${s}</option>`).join('');
+      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title+' '+(b.author||'')).trim());
+      const isPicked = randomPickId[tab] === b.id;
+      const isNew    = justAddedId === b.id;
+
+      const progressHTML = b.status === 'In Progress' ? `
+        <div class="progress-wrap card-progress">
+          <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+          <div class="progress-controls">
+            <input class="pages-read-input" type="number" inputmode="numeric" min="0" max="${b.pages||9999}"
+              value="${b.pagesRead||0}" data-id="${b.id}" data-tab="${tab}" oninput="updatePagesRead(this)">
+            <span class="progress-label">${b.pagesRead||0} / ${b.pages||'?'} pages — ${pct}%</span>
+          </div></div>` : '';
+
+      const starsHTML = b.status === 'Finished'
+        ? `<div class="star-row card-stars">${[1,2,3,4,5].map(i =>
+            `<button class="star-btn${(b.rating||0)>=i?' filled':''}" data-id="${b.id}" data-tab="${tab}" data-star="${i}" onclick="setRating(this)">★</button>`
+          ).join('')}</div>` : '';
+
+      const notesArea = activeNotes && activeNotes.id === b.id && activeNotes.tab === tab
+        ? `<div class="card-notes-area">
+             <div class="notes-label">My Notes</div>
+             <textarea class="notes-textarea" data-id="${b.id}" data-tab="${tab}"
+               oninput="saveNote(this)" placeholder="Add your thoughts…">${esc(b.notes||'')}</textarea>
+           </div>` : '';
+
+      const summaryArea = activeSummary && activeSummary.id === b.id && activeSummary.tab === tab
+        ? `<div class="card-summary-wrap">${buildSummaryRow(b, tab).replace(/<tr[^>]*>|<\/tr>|<td[^>]*>|<\/td>/g,'')}</div>` : '';
+
+      return `<div class="book-card${isPicked?' card-picked':''}${isNew?' card-new':''}" data-book-id="${b.id}">
+        <div class="card-top">
+          ${renderCoverCell(b)}
+          <div class="card-info">
+            <div class="card-title">${esc(b.title)}</div>
+            <div class="card-author">${esc(b.author||'')}</div>
+            ${b.genre ? `<span class="genre-tag">${esc(b.genre)}</span>` : ''}
+            <select class="status-select ${STATUS_CLS[b.status]||'s-notstarted'}"
+              data-id="${b.id}" data-tab="${tab}" onchange="changeStatus(this)" style="margin-top:6px">${opts}</select>
+          </div>
+          <div class="card-actions">
+            <button class="btn-delete" data-id="${b.id}" data-tab="${tab}" onclick="deleteBook(this)">✕</button>
+          </div>
+        </div>
+        ${starsHTML}
+        ${progressHTML}
+        <div class="card-footer">
+          <a class="btn-gr" href="${grUrl}" target="_blank" rel="noopener noreferrer">GR</a>
+          <button class="btn-info${activeSummary&&activeSummary.id===b.id?' open':''}"
+            data-id="${b.id}" data-tab="${tab}" onclick="toggleSummary(this)" title="Summary">ⓘ</button>
+          <button class="btn-notes${activeNotes&&activeNotes.id===b.id?' active':''}"
+            data-id="${b.id}" data-tab="${tab}" onclick="toggleNotes(this)" title="Notes">✎</button>
+        </div>
+        ${summaryArea}${notesArea}
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `<div class="card-list">${cards}</div>`;
+    books.forEach(b => { if (getCoverCache(b.id) === null) fetchCoverAsync(b.id, b.title, b.author); });
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ---- ACTIONS ---- */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+
+  function toggleForm(tab) {
+    const form = document.getElementById('form-' + tab);
+    form.classList.toggle('open');
+    if (form.classList.contains('open')) {
+      document.getElementById((tab === 'fiction' ? 'f' : 'nf') + '-title').focus();
+    }
+  }
+
+  function formKeydown(e, tab) { if (e.key === 'Enter') addBook(tab); }
+
+  function addBook(tab) {
+    const pfx = tab === 'fiction' ? 'f' : 'nf';
+    const title  = document.getElementById(pfx + '-title').value.trim();
+    const author = document.getElementById(pfx + '-author').value.trim();
+    const pages  = parseInt(document.getElementById(pfx + '-pages').value) || 0;
+    const owned  = document.getElementById(pfx + '-owned').checked;
+
+    if (!title) {
+      const inp = document.getElementById(pfx + '-title');
+      inp.focus(); inp.style.borderColor = '#ef4444';
+      setTimeout(() => { inp.style.borderColor = ''; }, 1200);
+      return;
+    }
+
+    const genre = (document.getElementById(pfx + '-genre') || {}).value || '';
+    const books = loadBooks(tab);
+    const newBook = { id: genId(), title, author, pages, owned, status: 'Not Started', dateFinished: '', pagesRead: 0, genre: genre.trim(), notes: '' };
+    books.push(newBook);
+    saveBooks(tab, books);
+    document.getElementById(pfx + '-title').value  = '';
+    document.getElementById(pfx + '-author').value = '';
+    const pagesEl = document.getElementById(pfx + '-pages');
+    pagesEl.value = '';
+    pagesEl.placeholder = pfx === 'f' ? 'e.g. 336' : 'e.g. 256';
+    pagesEl.classList.remove('pages-loading');
+    pageFetchState[tab] = null;
+    document.getElementById(pfx + '-owned').checked = false;
+    const genreEl = document.getElementById(pfx + '-genre');
+    if (genreEl) genreEl.value = '';
+    justAddedId = newBook.id;
+    render(tab);
+    justAddedId = null;
+  }
+
+  function deleteBook(btn) {
+    const { id, tab } = btn.dataset;
+    // Animate out then remove
+    const tr = document.querySelector(`tr[data-book-id="${id}"]`);
+    const card = document.querySelector(`.book-card[data-book-id="${id}"]`);
+    function doDelete() {
+      saveBooks(tab, loadBooks(tab).filter(b => b.id !== id));
+      render(tab);
+    }
+    if (tr) {
+      tr.classList.add('tr-exit');
+      setTimeout(doDelete, 160);
+    } else if (card) {
+      card.classList.add('card-exit');
+      setTimeout(doDelete, 160);
+    } else {
+      doDelete();
+    }
+  }
+
+  function changeStatus(select) {
+    const { id, tab } = select.dataset;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.status = select.value;
+    if (book.status === 'Finished') {
+      book.dateFinished = book.dateFinished || today();
+      triggerConfetti();
+    } else {
+      book.dateFinished = '';
+    }
+    saveBooks(tab, books);
+    render(tab);
+  }
+
+  function updatePagesRead(input) {
+    const { id, tab } = input.dataset;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    const val = Math.max(0, Math.min(Number(input.value) || 0, Number(book.pages) || 99999));
+    book.pagesRead = val;
+    saveBooks(tab, books);
+    // Patch DOM without re-render to preserve focus
+    const row = input.closest('tr');
+    if (row) {
+      const pct = book.pages ? Math.min(100, Math.round(val / Number(book.pages) * 100)) : 0;
+      const fill  = row.querySelector('.progress-bar-fill');
+      const label = row.querySelector('.progress-label');
+      if (fill)  fill.style.width = pct + '%';
+      if (label) label.textContent = `${val} / ${book.pages || '?'} pages — ${pct}%`;
+    }
+    renderStats(tab, loadBooks(tab));
+  }
+
+  function toggleOwned(checkbox) {
+    const { id, tab } = checkbox.dataset;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.owned = checkbox.checked;
+    saveBooks(tab, books);
+    checkbox.title = book.owned ? 'Owned' : 'Not owned';
+  }
+
+  function updateDate(input) {
+    const { id, tab } = input.dataset;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.dateFinished = input.value;
+    saveBooks(tab, books);
+    renderYearStats();
+  }
+
+  function handleSort(tab, col) {
+    const state = loadSortState(tab);
+    if (col === 'status') {
+      // Toggle the primary status sort direction; leave secondary unchanged
+      state.statusDir = (state.statusDir || 'asc') === 'asc' ? 'desc' : 'asc';
+    } else {
+      // Set or toggle secondary sort; leave status direction unchanged
+      state.dir = state.col === col ? (state.dir === 'asc' ? 'desc' : 'asc') : 'asc';
+      state.col = col;
+    }
+    saveSortState(tab, state);
+    render(tab);
+  }
+
+  function handleSearch(tab, val) {
+    searchQuery[tab] = val;
+    render(tab);
+  }
+
+  /* ---- PAGE AUTOFILL ---- */
+  async function autofillPages(tab) {
+    const pfx = tab === 'fiction' ? 'f' : 'nf';
+    const titleEl = document.getElementById(pfx + '-title');
+    const authorEl = document.getElementById(pfx + '-author');
+    const pagesEl  = document.getElementById(pfx + '-pages');
+
+    const title  = titleEl.value.trim();
+    const author = authorEl.value.trim();
+
+    // Need both fields; don't overwrite a value the user already typed
+    if (!title || !author || pagesEl.value) return;
+
+    const combo = title + '||' + author;
+    if (pageFetchState[tab] === combo) return; // already fetched this exact pair
+    pageFetchState[tab] = combo;
+
+    pagesEl.placeholder = 'Fetching…';
+    pagesEl.classList.add('pages-loading');
+    pagesEl.disabled = true;
+
+    try {
+      const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&fields=number_of_pages_median&limit=1`;
+      const res  = await fetch(url);
+      const data = await res.json();
+      const pages = data.docs && data.docs[0] && data.docs[0].number_of_pages_median;
+      if (pages && pages > 0) {
+        pagesEl.value = pages;
+        pagesEl.placeholder = pfx === 'f' ? 'e.g. 336' : 'e.g. 256';
+      } else {
+        pagesEl.placeholder = 'Not found — enter manually';
+      }
+    } catch {
+      pagesEl.placeholder = 'Not found — enter manually';
+    } finally {
+      pagesEl.disabled = false;
+      pagesEl.classList.remove('pages-loading');
+    }
+  }
+
+  /* ---- STAR RATING ---- */
+  function setRating(btn) {
+    const { id, tab } = btn.dataset;
+    const star = Number(btn.dataset.star);
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.rating = (book.rating === star) ? 0 : star;
+    saveBooks(tab, books);
+    // Patch stars inline — no full re-render needed
+    const stars = btn.closest('.star-row').querySelectorAll('.star-btn');
+    stars.forEach((s, i) => s.classList.toggle('filled', book.rating >= i + 1));
+  }
+
+  /* ---- SUMMARY ---- */
+  function buildSummaryRow(book, tab) {
+    const s = activeSummary;
+    let inner;
+    if (s.status === 'loading') {
+      inner = `<div class="summary-loading"><div class="spinner"></div>Fetching summary…</div>`;
+    } else if (s.status === 'done') {
+      inner = `<div class="summary-panel"><span class="summary-panel-icon">📖</span><span>${esc(s.text)}</span></div>`;
+    } else {
+      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((book.title + ' ' + book.author).trim());
+      inner = `<div class="summary-panel"><span class="summary-panel-icon">🔍</span><span class="summary-notfound">No summary found — try searching <a href="${grUrl}" target="_blank" rel="noopener noreferrer">Goodreads</a>.</span></div>`;
+    }
+    return `<tr class="summary-row"><td colspan="10">${inner}</td></tr>`;
+  }
+
+  function toggleSummary(btn) {
+    const { id, tab } = btn.dataset;
+    if (activeSummary && activeSummary.id === id) {
+      activeSummary = null;
+      render(tab);
+      return;
+    }
+    const cached = getSummaryCache(id);
+    if (cached !== undefined) {
+      activeSummary = { id, tab, status: cached ? 'done' : 'notfound', text: cached };
+      render(tab);
+    } else {
+      activeSummary = { id, tab, status: 'loading' };
+      render(tab);
+      fetchSummary(id, tab);
+    }
+  }
+
+  async function fetchSummary(id, tab) {
+    const book = loadBooks(tab).find(b => b.id === id);
+    if (!book) return;
+    try {
+      const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author || '')}&fields=key,first_sentence&limit=3`;
+      const res = await fetch(url);
+      const data = await res.json();
+      let summary = null;
+
+      // Pass 1: first_sentence from search results
+      for (const doc of (data.docs || [])) {
+        const fs = doc.first_sentence;
+        if (fs && (typeof fs === 'string' ? fs : fs.value)) {
+          summary = typeof fs === 'string' ? fs : fs.value;
+          break;
+        }
+      }
+
+      // Pass 2: fetch work description if no first_sentence
+      if (!summary && data.docs && data.docs[0] && data.docs[0].key) {
+        try {
+          const workRes = await fetch(`https://openlibrary.org${data.docs[0].key}.json`);
+          const work = await workRes.json();
+          if (work.description) {
+            summary = typeof work.description === 'string' ? work.description : (work.description.value || null);
+          }
+        } catch {}
+      }
+
+      setSummaryCache(id, summary || '');
+      if (activeSummary && activeSummary.id === id && activeSummary.tab === tab) {
+        activeSummary = { id, tab, status: summary ? 'done' : 'notfound', text: summary || '' };
+        render(tab);
+      }
+    } catch {
+      if (activeSummary && activeSummary.id === id && activeSummary.tab === tab) {
+        activeSummary = { id, tab, status: 'notfound' };
+        render(tab);
+      }
+    }
+  }
+
+  /* ---- EXPORT / IMPORT ---- */
+  function exportData() {
+    const payload = { version: 1, exported: new Date().toISOString(), data: {} };
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('tbr')) {
+        payload.data[key] = localStorage.getItem(key);
+      }
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tbr-backup.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function triggerImport() {
+    document.getElementById('import-file-input').value = '';
+    document.getElementById('import-file-input').click();
+  }
+
+  function importData(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const payload = JSON.parse(e.target.result);
+        const entries = payload.data || payload; // support both versioned and raw formats
+        if (typeof entries !== 'object' || Array.isArray(entries)) throw new Error('Invalid format');
+        // Clear existing tbr keys then restore
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('tbr')) keysToRemove.push(k);
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        Object.entries(entries).forEach(([k, v]) => {
+          if (k.startsWith('tbr')) localStorage.setItem(k, v);
+        });
+        render('fiction');
+        render('nonfiction');
+        renderYearStats();
+        // Show feedback
+        const fb = document.getElementById('import-feedback');
+        fb.classList.add('visible');
+        setTimeout(() => fb.classList.remove('visible'), 2500);
+      } catch {
+        alert('Import failed — the file does not appear to be a valid TBR backup.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  /* ---- COVER CACHE ---- */
+  function getCoverCache(id) {
+    const val = localStorage.getItem(COVER_PREFIX + id);
+    if (val === null) return null;   // not yet fetched
+    return val;                       // coverId string or 'none'
+  }
+  function setCoverCache(id, val) {
+    try { localStorage.setItem(COVER_PREFIX + id, val); } catch(e) {}
+  }
+  async function fetchCoverAsync(bookId, title, author) {
+    if (coverFetchPending.has(bookId)) return;
+    if (getCoverCache(bookId) !== null) return;
+    coverFetchPending.add(bookId);
+    try {
+      const q = encodeURIComponent((title + ' ' + (author || '')).trim());
+      const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`);
+      const data = await res.json();
+      const coverId = data.docs && data.docs[0] && data.docs[0].cover_i ? String(data.docs[0].cover_i) : 'none';
+      setCoverCache(bookId, coverId);
+      // Patch DOM if element still present
+      const el = document.getElementById('cover-' + bookId);
+      if (el) {
+        if (coverId !== 'none') {
+          el.innerHTML = `<img src="https://covers.openlibrary.org/b/id/${coverId}-S.jpg" alt="" style="width:34px;height:48px;object-fit:cover;border-radius:3px;display:block;">`;
+          el.classList.remove('cover-placeholder');
+        }
+      }
+    } catch(e) {
+      setCoverCache(bookId, 'none');
+    } finally {
+      coverFetchPending.delete(bookId);
+    }
+  }
+
+  /* ---- GOAL BAR ---- */
+  function renderGoalBar() {
+    const el = document.getElementById('goal-bar');
+    if (!el) return;
+    const year = new Date().getFullYear();
+    const goal = parseInt(localStorage.getItem(GOAL_KEY + year)) || 0;
+    // Count finished across both tabs this year
+    const allBooks = [...loadBooks('fiction'), ...loadBooks('nonfiction')];
+    const finished = allBooks.filter(b => b.status === 'Finished' && (b.dateFinished || '').startsWith(String(year))).length;
+    if (!goal) {
+      el.innerHTML = `<div class="goal-bar-empty"><button class="btn-genre" onclick="promptGoal()">+ Set ${year} reading goal</button></div>`;
+      return;
+    }
+    const pct = Math.min(100, Math.round((finished / goal) * 100));
+    const done = finished >= goal;
+    el.innerHTML = `
+      <div class="goal-bar-wrap${done ? ' goal-done' : ''}">
+        <div class="goal-bar-label">
+          <span>${year} Reading Goal</span>
+          <span>${finished} / <span class="goal-target" onclick="editGoal(${year})" title="Edit goal">${goal}</span> books${done ? ' 🎉' : ''}</span>
+        </div>
+        <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  }
+  function promptGoal() {
+    const year = new Date().getFullYear();
+    const cur = localStorage.getItem(GOAL_KEY + year) || '';
+    const val = prompt(`Set your ${year} reading goal (number of books):`, cur);
+    if (val === null) return;
+    const n = parseInt(val);
+    if (n > 0) { localStorage.setItem(GOAL_KEY + year, String(n)); renderGoalBar(); }
+    else if (val.trim() === '' || n === 0) { localStorage.removeItem(GOAL_KEY + year); renderGoalBar(); }
+  }
+  function editGoal(year) {
+    const cur = localStorage.getItem(GOAL_KEY + year) || '';
+    const val = prompt(`Edit your ${year} reading goal:`, cur);
+    if (val === null) return;
+    const n = parseInt(val);
+    if (n > 0) { localStorage.setItem(GOAL_KEY + year, String(n)); renderGoalBar(); }
+    else if (val.trim() === '' || n === 0) { localStorage.removeItem(GOAL_KEY + year); renderGoalBar(); }
+  }
+
+  /* ---- CONFETTI ---- */
+  function triggerConfetti() {
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const colors = ['#E8006A','#FF2D78','#D45080','#FF6EB4','#FFB3D1','#C0005A','#FF85C2','#fff'];
+    const pieces = Array.from({length: 80}, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height * -0.5 - 10,
+      r: 4 + Math.random() * 6,
+      d: 2 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0,
+      tiltSpeed: 0.08 + Math.random() * 0.07
+    }));
+    const start = performance.now();
+    const duration = 2200;
+    function frame(now) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const elapsed = now - start;
+      const fade = Math.max(0, 1 - (elapsed - 1600) / 600);
+      ctx.globalAlpha = fade;
+      pieces.forEach(p => {
+        p.y += p.d;
+        p.tiltAngle += p.tiltSpeed;
+        p.tilt = Math.sin(p.tiltAngle) * 12;
+        ctx.beginPath();
+        ctx.ellipse(p.x + p.tilt, p.y, p.r * 0.5, p.r, p.tiltAngle, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+      });
+      if (elapsed < duration) requestAnimationFrame(frame);
+      else canvas.remove();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---- RANDOM PICK ---- */
+  function pickRandom(tab) {
+    const books = loadBooks(tab).filter(b => b.status === 'Not Started');
+    if (!books.length) { showPickBanner(tab, null); return; }
+    const picked = books[Math.floor(Math.random() * books.length)];
+    randomPickId[tab] = picked.id;
+    render(tab);
+    showPickBanner(tab, picked.title);
+    // Scroll picked row into view
+    const el = document.querySelector(`tr[data-book-id="${picked.id}"], .book-card[data-book-id="${picked.id}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function showPickBanner(tab, title) {
+    const el = document.getElementById('pick-banner-' + tab);
+    if (!el) return;
+    if (!title) {
+      el.innerHTML = '<div class="pick-banner">No unread books to pick from!</div>';
+    } else {
+      el.innerHTML = `<div class="pick-banner">🎲 Random pick: <strong>${esc(title)}</strong></div>`;
+    }
+    setTimeout(() => { if (el) el.innerHTML = ''; }, 4000);
+  }
+
+  /* ---- GENRE FILTER ---- */
+  function renderGenreFilter(tab) {
+    const el = document.getElementById('genre-filter-' + tab);
+    if (!el) return;
+    const books = loadBooks(tab);
+    const genres = [...new Set(books.map(b => b.genre).filter(Boolean))].sort();
+    if (!genres.length) { el.innerHTML = ''; return; }
+    const cur = genreFilter[tab];
+    const btns = genres.map(g =>
+      `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}'">${esc(g)}</button>`
+    ).join('');
+    el.innerHTML = `<div class="genre-filter-bar"><span class="genre-filter-label">Genre:</span>${btns}<button class="btn-genre${!cur ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}',null)">All</button></div>`;
+  }
+  function setGenreFilter(tab, genre) {
+    genreFilter[tab] = genre || null;
+    render(tab);
+  }
+
+  /* ---- NOTES ---- */
+  function toggleNotes(btn) {
+    const { id, tab } = btn.dataset;
+    if (activeNotes && activeNotes.id === id && activeNotes.tab === tab) {
+      activeNotes = null;
+    } else {
+      activeNotes = { id, tab };
+    }
+    render(tab);
+  }
+  function buildNotesRow(b, tab) {
+    const notes = (b.notes || '').replace(/"/g, '&quot;');
+    return `<tr class="notes-row"><td colspan="10"><div class="notes-wrap">
+      <textarea class="notes-textarea" placeholder="Add notes…" oninput="saveNote(this)" data-id="${b.id}" data-tab="${tab}">${notes}</textarea>
+    </div></td></tr>`;
+  }
+  function saveNote(textarea) {
+    const { id, tab } = textarea.dataset;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.notes = textarea.value;
+    saveBooks(tab, books);
+  }
+
+  /* ---- RESIZE HANDLER ---- */
+  let _resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      render('fiction');
+      render('nonfiction');
+    }, 200);
+  });
+
+  /* ---- INIT ---- */
+  render('fiction');
+  render('nonfiction');
+</script>
+</body>
+</html>
