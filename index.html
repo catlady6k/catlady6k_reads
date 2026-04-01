@@ -102,12 +102,27 @@
     bottom: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,26,108,0.6), transparent);
   }
+  .header-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .header-logo {
+    height: 56px;
+    width: auto;
+    flex-shrink: 0;
+    mix-blend-mode: multiply;
+    display: block;
+  }
   .app-header h1 {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 2.8rem;
     font-weight: 900;
     letter-spacing: -0.5px;
-    margin-bottom: 6px;
+    margin: 0;
     position: relative;
     background: linear-gradient(135deg, #FFFFFF 20%, #FF4D8C 60%, #FF1A6C);
     -webkit-background-clip: text;
@@ -1086,7 +1101,10 @@
 <body>
 
 <header class="app-header">
-  <h1>📚 Catlady6k's Reads</h1>
+  <div class="header-title-wrap">
+    <img src="https://catlady6k.github.io/catlady6k_reads/boot.png" alt="" class="header-logo">
+    <h1>Catlady6k's Reads</h1>
+  </div>
   <p>Your personal to-be-read list</p>
 </header>
 
@@ -1125,7 +1143,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Title</label>
-          <input type="text" id="f-title" placeholder="Book title" onkeydown="formKeydown(event,'fiction')" oninput="autofillAuthor('fiction')" onblur="autofillPages('fiction')">
+          <input type="text" id="f-title" placeholder="Book title" onkeydown="formKeydown(event,'fiction')" onblur="autofillAuthor('fiction');autofillPages('fiction')">
         </div>
         <div class="form-group">
           <label>Author</label>
@@ -1172,7 +1190,7 @@
       <div class="form-row">
         <div class="form-group">
           <label>Title</label>
-          <input type="text" id="nf-title" placeholder="Book title" onkeydown="formKeydown(event,'nonfiction')" oninput="autofillAuthor('nonfiction')" onblur="autofillPages('nonfiction')">
+          <input type="text" id="nf-title" placeholder="Book title" onkeydown="formKeydown(event,'nonfiction')" onblur="autofillAuthor('nonfiction');autofillPages('nonfiction')">
         </div>
         <div class="form-group">
           <label>Author</label>
@@ -1997,25 +2015,14 @@
   }
 
   /* ---- AUTHOR AUTOFILL ---- */
-  const _authorFillTimers = {};
-  function autofillAuthor(tab) {
+  async function autofillAuthor(tab) {
     const pfx = tab === 'fiction' ? 'f' : 'nf';
     const titleEl  = document.getElementById(pfx + '-title');
     const authorEl = document.getElementById(pfx + '-author');
-    // Don't overwrite something the user has already typed
-    if (authorEl.dataset.userEdited === 'true') return;
-    const title = titleEl.value.trim();
-    if (!title) { authorEl.placeholder = 'Author name'; return; }
-    clearTimeout(_authorFillTimers[tab]);
-    _authorFillTimers[tab] = setTimeout(() => _doAutofillAuthor(tab, title), 500);
-  }
-
-  async function _doAutofillAuthor(tab, title) {
-    const pfx = tab === 'fiction' ? 'f' : 'nf';
-    const authorEl = document.getElementById(pfx + '-author');
     if (!authorEl || authorEl.dataset.userEdited === 'true') return;
-    // Don't clobber if user typed something while we were waiting
     if (authorEl.value.trim()) return;
+    const title = titleEl.value.trim();
+    if (!title) return;
     authorEl.placeholder = 'Searching…';
     try {
       const res  = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&fields=author_name&limit=1`);
