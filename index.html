@@ -909,6 +909,33 @@
     border-radius: 4px; font-family: inherit; transition: color 0.15s; flex-shrink: 0;
   }
   .btn-gf-close:hover { color: var(--text-primary); }
+  .btn-gf-add {
+    padding: 3px 9px; background: none; border: 1px dashed var(--border-mid);
+    border-radius: 20px; font-size: 0.72rem; font-weight: 600; font-family: inherit;
+    color: var(--text-muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    touch-action: manipulation;
+  }
+  .btn-gf-add:hover { border-color: var(--clay); color: var(--clay-light); }
+  .gf-add-wrap {
+    display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  }
+  .gf-add-input {
+    padding: 3px 8px; background: var(--surface-3); border: 1px solid var(--accent);
+    border-radius: 20px; color: var(--text-primary); font-size: 0.72rem;
+    font-family: inherit; outline: none; width: 110px;
+  }
+  .gf-add-input::placeholder { color: var(--text-muted); }
+  .btn-gf-confirm {
+    padding: 3px 8px; background: var(--accent); border: none; border-radius: 20px;
+    color: white; font-size: 0.72rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+  }
+  .btn-gf-confirm:hover { background: var(--accent-light); }
+  .btn-gf-cancel {
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    font-size: 0.85rem; padding: 0 3px; font-family: inherit; transition: color 0.15s;
+  }
+  .btn-gf-cancel:hover { color: var(--text-primary); }
 
   /* Reading goal bar */
   .goal-bar-section { width: 100%; padding: 4px 20px 20px; }
@@ -2566,6 +2593,9 @@
       <span class="genre-filter-label">Filter:</span>
       ${btns}
       <button class="btn-genre${!cur ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}',null)">All</button>
+      <span class="gf-add-wrap" id="gf-add-wrap-${tab}">
+        <button class="btn-gf-add" onclick="showGfAddInput('${tab}')" title="Add genre">+ Add</button>
+      </span>
       <button class="btn-gf-close" onclick="closeGenreFilter('${tab}')" title="Close">✕</button>
     </div>`;
   }
@@ -2585,6 +2615,31 @@
     genreFilter[tab] = genre || null;
     if (!genre) genreFilterOpen[tab] = false;
     render(tab);
+  }
+  function showGfAddInput(tab) {
+    const wrap = document.getElementById('gf-add-wrap-' + tab);
+    if (!wrap) return;
+    wrap.innerHTML = `
+      <input class="gf-add-input" id="gf-add-input-${tab}" placeholder="Genre name…"
+        onkeydown="if(event.key==='Enter'){confirmGfAdd('${tab}')}else if(event.key==='Escape'){cancelGfAdd('${tab}')}"
+        oninput="this.value=this.value.slice(0,40)">
+      <button class="btn-gf-confirm" onclick="confirmGfAdd('${tab}')">✓</button>
+      <button class="btn-gf-cancel" onclick="cancelGfAdd('${tab}')" title="Cancel">✕</button>`;
+    const inp = document.getElementById('gf-add-input-' + tab);
+    if (inp) inp.focus();
+  }
+  function cancelGfAdd(tab) {
+    const wrap = document.getElementById('gf-add-wrap-' + tab);
+    if (wrap) wrap.innerHTML = `<button class="btn-gf-add" onclick="showGfAddInput('${tab}')" title="Add genre">+ Add</button>`;
+  }
+  async function confirmGfAdd(tab) {
+    const inp = document.getElementById('gf-add-input-' + tab);
+    if (!inp) return;
+    const genre = inp.value.trim();
+    if (!genre) { cancelGfAdd(tab); return; }
+    await persistCustomGenre(genre);
+    render('fiction');
+    render('nonfiction');
   }
 
   /* ---- NOTES ---- */
