@@ -793,16 +793,62 @@
     font-size: 1rem; font-weight: 900; color: var(--accent-light); user-select: none;
   }
 
-  /* Genre tag (inline in title cell) */
+  /* Genre tags (inline in title cell) */
+  .genre-tags-wrap { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 3px; }
   .genre-tag {
-    display: inline-block;
-    background: rgba(232,64,42,0.15); color: var(--clay-light);
-    border: 1px solid rgba(232,64,42,0.35); border-radius: 20px;
-    padding: 1px 7px; font-size: 0.67rem; font-weight: 600;
-    letter-spacing: 0.2px; white-space: nowrap;
-    max-width: 110px; overflow: hidden; text-overflow: ellipsis;
-    cursor: default;
+    display: inline-flex; align-items: center; gap: 3px;
+    background: rgba(232,64,42,0.14); color: var(--clay-light);
+    border: 1px solid rgba(232,64,42,0.38); border-radius: 20px;
+    padding: 1px 6px 1px 8px; font-size: 0.66rem; font-weight: 600;
+    letter-spacing: 0.2px; white-space: nowrap; cursor: default;
+    max-width: 120px;
   }
+  .genre-tag-text { overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+  .genre-tag-remove {
+    background: none; border: none; padding: 0; margin: 0; cursor: pointer;
+    color: var(--clay-light); font-size: 0.7rem; line-height: 1;
+    opacity: 0.7; font-family: inherit; flex-shrink: 0;
+    transition: opacity 0.12s, color 0.12s;
+  }
+  .genre-tag-remove:hover { opacity: 1; color: var(--accent-light); }
+  .btn-genre-add {
+    background: none; border: 1px dashed rgba(232,64,42,0.45); border-radius: 20px;
+    color: var(--clay); padding: 1px 7px; font-size: 0.66rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+    line-height: 1.6; touch-action: manipulation;
+  }
+  .btn-genre-add:hover { border-color: var(--accent); color: var(--accent-light); background: rgba(255,26,108,0.07); }
+  /* Genre input popup */
+  .genre-input-wrap {
+    position: relative; display: inline-block;
+  }
+  .genre-input-popup {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 200;
+    background: var(--surface-2); border: 1px solid var(--border-mid);
+    border-radius: 8px; padding: 6px; min-width: 180px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+  }
+  .genre-input-popup select {
+    width: 100%; padding: 6px 8px; background: var(--surface-3);
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);
+    font-size: 0.8rem; font-family: inherit; outline: none; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+  }
+  .genre-input-popup select:focus { border-color: var(--accent); }
+  .genre-input-popup-row { display: flex; gap: 5px; margin-top: 5px; }
+  .genre-input-text {
+    flex: 1; padding: 5px 8px; background: var(--surface-3);
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary);
+    font-size: 0.8rem; font-family: inherit; outline: none; min-width: 0;
+  }
+  .genre-input-text:focus { border-color: var(--accent); }
+  .genre-input-text::placeholder { color: var(--text-muted); }
+  .btn-genre-confirm {
+    padding: 5px 10px; background: var(--accent); border: none; border-radius: 6px;
+    color: white; font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: inherit;
+    white-space: nowrap; transition: background 0.15s;
+  }
+  .btn-genre-confirm:hover { background: var(--accent-light); }
 
   /* Genre filter bar */
   .genre-filter-bar {
@@ -1269,7 +1315,7 @@
       owned:         book.owned         || false,
       pages_read:    book.pagesRead     || 0,
       rating:        book.rating        || 0,
-      genre:         book.genre         || null,
+      genre:         book.genres && book.genres.length ? JSON.stringify(book.genres) : (book.genre || null),
       notes:         book.notes         || null,
       date_started:  book.dateStarted   || null,
       cover_url:     null,
@@ -1288,7 +1334,7 @@
       owned:        !!row.owned,
       pagesRead:    row.pages_read    || 0,
       rating:       row.rating        || 0,
-      genre:        row.genre         || '',
+      genres:       parseGenres(row.genre),
       notes:        row.notes         || '',
       dateStarted:  row.date_started  || '',
     };
@@ -1538,7 +1584,7 @@
       ? books.filter(b => b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q))
       : books;
     if (statFilter[tab])  filtered = filtered.filter(b => b.status === statFilter[tab]);
-    if (genreFilter[tab]) filtered = filtered.filter(b => b.genre === genreFilter[tab]);
+    if (genreFilter[tab]) filtered = filtered.filter(b => (b.genres || []).includes(genreFilter[tab]));
     const sorted = sortBooks(filtered, sortState.col, sortState.dir, sortState.statusDir || 'asc');
     renderStats(tab, books);
     renderStatFilter(tab);
@@ -1749,7 +1795,7 @@
             ${renderCoverCell(b)}
             <div class="title-cell-text">
               <span>${esc(b.title)}</span>
-              ${b.genre ? `<span class="genre-tag">${esc(b.genre)}</span>` : ''}
+              ${renderGenreTags(b, tab)}
             </div>
           </div>
         </td>
@@ -1831,7 +1877,7 @@
           <div class="card-info">
             <div class="card-title">${esc(b.title)}</div>
             <div class="card-author">${esc(b.author||'')}</div>
-            ${b.genre ? `<span class="genre-tag">${esc(b.genre)}</span>` : ''}
+            ${renderGenreTags(b, tab)}
             <select class="status-select ${STATUS_CLS[b.status]||'s-notstarted'}"
               data-id="${b.id}" data-tab="${tab}" onchange="changeStatus(this)" style="margin-top:6px">${opts}</select>
           </div>
@@ -1894,7 +1940,7 @@
 
     const genre = (document.getElementById(pfx + '-genre') || {}).value || '';
     const books = loadBooks(tab);
-    const newBook = { id: genId(), title, author, pages, owned, status: 'Not Started', dateFinished: '', pagesRead: 0, genre: genre.trim(), notes: '' };
+    const newBook = { id: genId(), title, author, pages, owned, status: 'Not Started', dateFinished: '', pagesRead: 0, genres: genre.trim() ? [genre.trim()] : [], notes: '' };
     books.push(newBook);
     saveBooks(tab, books);
     document.getElementById(pfx + '-title').value  = '';
@@ -2396,7 +2442,7 @@
     const el = document.getElementById('genre-filter-' + tab);
     if (!el) return;
     const books = loadBooks(tab);
-    const genres = [...new Set(books.map(b => b.genre).filter(Boolean))].sort();
+    const genres = [...new Set(books.flatMap(b => b.genres || []).filter(Boolean))].sort();
     if (!genres.length) { el.innerHTML = ''; return; }
     const cur = genreFilter[tab];
     const btns = genres.map(g =>
@@ -2433,6 +2479,93 @@
     book.notes = textarea.value;
     saveBooks(tab, books);
     sbUpsertDebounced(book, tab, 'note_' + id);
+  }
+
+  /* ---- GENRE TAG MANAGEMENT ---- */
+  const GENRE_SUGGESTIONS = ['Literary Fiction','Historical Fiction','Sci-Fi','Fantasy','Romance',
+    'Thriller','Mystery','Horror','Memoir','Biography','History','Science','Self-Help',
+    'Essays','Poetry','Graphic Novel','Other'];
+
+  function parseGenres(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try { const p = JSON.parse(raw); if (Array.isArray(p)) return p; } catch {}
+    // Legacy plain string
+    return raw.trim() ? [raw.trim()] : [];
+  }
+
+  function renderGenreTags(b, tab) {
+    const genres = b.genres || [];
+    const max = 5;
+    const tags = genres.map((g, i) =>
+      `<span class="genre-tag">
+        <span class="genre-tag-text">${esc(g)}</span>
+        <button class="genre-tag-remove" onclick="removeGenreTag('${b.id}','${tab}',${i})" title="Remove">×</button>
+      </span>`
+    ).join('');
+    const addBtn = genres.length < max
+      ? `<span class="genre-input-wrap" id="genre-wrap-${b.id}">
+           <button class="btn-genre-add" onclick="openGenreInput('${b.id}','${tab}')" title="Add genre">+</button>
+         </span>`
+      : '';
+    return `<div class="genre-tags-wrap">${tags}${addBtn}</div>`;
+  }
+
+  function openGenreInput(id, tab) {
+    const wrap = document.getElementById('genre-wrap-' + id);
+    if (!wrap || wrap.querySelector('.genre-input-popup')) return;
+    const opts = GENRE_SUGGESTIONS.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+    wrap.insertAdjacentHTML('beforeend', `
+      <div class="genre-input-popup" id="genre-popup-${id}">
+        <select onchange="if(this.value){commitGenreTag('${id}','${tab}',this.value);}" >
+          <option value="">— pick a genre —</option>${opts}
+        </select>
+        <div class="genre-input-popup-row">
+          <input class="genre-input-text" id="genre-text-${id}" placeholder="or type custom…"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();commitGenreTag('${id}','${tab}',this.value);}">
+          <button class="btn-genre-confirm" onclick="commitGenreTag('${id}','${tab}',document.getElementById('genre-text-${id}').value)">Add</button>
+        </div>
+      </div>`);
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        const popup = document.getElementById('genre-popup-' + id);
+        if (popup && !popup.closest('.genre-input-wrap').contains(e.target)) {
+          popup.remove();
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 0);
+    const textEl = document.getElementById('genre-text-' + id);
+    if (textEl) textEl.focus();
+  }
+
+  function commitGenreTag(id, tab, value) {
+    const g = (value || '').trim();
+    if (!g) return;
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    const genres = book.genres || [];
+    if (genres.length >= 5 || genres.includes(g)) {
+      document.getElementById('genre-popup-' + id)?.remove();
+      return;
+    }
+    book.genres = [...genres, g];
+    saveBooks(tab, books);
+    sbUpsert(book, tab);
+    document.getElementById('genre-popup-' + id)?.remove();
+    render(tab);
+  }
+
+  function removeGenreTag(id, tab, idx) {
+    const books = loadBooks(tab);
+    const book = books.find(b => b.id === id);
+    if (!book) return;
+    book.genres = (book.genres || []).filter((_, i) => i !== idx);
+    saveBooks(tab, books);
+    sbUpsert(book, tab);
+    render(tab);
   }
 
   /* ---- RESIZE HANDLER ---- */
