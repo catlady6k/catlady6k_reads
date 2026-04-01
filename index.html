@@ -851,20 +851,55 @@
   .btn-genre-confirm:hover { background: var(--accent-light); }
 
   /* Genre filter bar */
-  .genre-filter-bar {
-    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-    margin-bottom: 14px; font-size: 0.78rem;
+  /* Genre filter toggle button (in toolbar) */
+  .btn-genre-filter {
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    background: var(--surface-1);
+    color: var(--text-muted);
+    transition: all 0.18s;
+    white-space: nowrap;
+    position: relative;
+    touch-action: manipulation;
   }
-  .genre-filter-label { color: var(--text-muted); font-weight: 600; margin-right: 2px; }
+  .btn-genre-filter:hover { border-color: var(--clay); color: var(--clay-light); background: var(--surface-2); }
+  .btn-genre-filter.gf-open { border-color: var(--clay); color: var(--clay-light); background: var(--surface-2); }
+  .btn-genre-filter.gf-active { border-color: var(--accent); color: var(--accent-light); background: rgba(255,26,108,0.08); }
+  .gf-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-left: 5px; vertical-align: middle;
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+
+  /* Genre filter panel (collapsible, below toolbar) */
+  .genre-filter-panel {
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    padding: 8px 12px; margin-bottom: 10px;
+    background: var(--surface-2); border: 1px solid var(--border-mid);
+    border-radius: 8px; font-size: 0.78rem;
+    animation: fadeIn 0.14s ease;
+  }
+  .genre-filter-label { color: var(--text-muted); font-weight: 600; margin-right: 2px; flex-shrink: 0; }
   .btn-genre {
     padding: 3px 10px;
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 20px;
+    background: var(--surface-3); border: 1px solid var(--border); border-radius: 20px;
     font-size: 0.72rem; font-weight: 600; font-family: inherit;
     color: var(--text-muted); cursor: pointer; transition: all 0.15s;
     touch-action: manipulation;
   }
   .btn-genre:hover { border-color: var(--clay); color: var(--clay-light); }
   .btn-genre.btn-genre-active { background: var(--clay-dark); border-color: var(--clay); color: var(--white); }
+  .btn-gf-close {
+    margin-left: auto; background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-size: 0.9rem; padding: 2px 6px;
+    border-radius: 4px; font-family: inherit; transition: color 0.15s; flex-shrink: 0;
+  }
+  .btn-gf-close:hover { color: var(--text-primary); }
 
   /* Reading goal bar */
   .goal-bar-section { width: 100%; padding: 4px 20px 20px; }
@@ -1179,6 +1214,7 @@
     <div class="pick-banner-wrap" id="pick-banner-fiction"></div>
     <div class="toolbar">
       <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('fiction', this.value)" id="search-fiction">
+      <button class="btn-genre-filter" id="gf-btn-fiction" onclick="toggleGenreFilter('fiction')">⊞ Genre</button>
       <button class="btn-random" onclick="pickRandom('fiction')">🎲 Random Pick</button>
       <button class="btn-add" onclick="toggleForm('fiction')">+ Add Book</button>
     </div>
@@ -1226,6 +1262,7 @@
     <div class="pick-banner-wrap" id="pick-banner-nonfiction"></div>
     <div class="toolbar">
       <input class="search-box" type="text" placeholder="Search by title or author…" oninput="handleSearch('nonfiction', this.value)" id="search-nonfiction">
+      <button class="btn-genre-filter" id="gf-btn-nonfiction" onclick="toggleGenreFilter('nonfiction')">⊞ Genre</button>
       <button class="btn-random" onclick="pickRandom('nonfiction')">🎲 Random Pick</button>
       <button class="btn-add" onclick="toggleForm('nonfiction')">+ Add Book</button>
     </div>
@@ -2438,20 +2475,95 @@
   }
 
   /* ---- GENRE FILTER ---- */
+  const CUSTOM_GENRES_KEY = 'tbr_custom_genres';
+  let genreFilterOpen = { fiction: false, nonfiction: false };
+
+  function loadCustomGenres() {
+    try { return JSON.parse(localStorage.getItem(CUSTOM_GENRES_KEY)) || []; }
+    catch { return []; }
+  }
+  function saveCustomGenres(list) {
+    try { localStorage.setItem(CUSTOM_GENRES_KEY, JSON.stringify(list)); } catch {}
+  }
+  async function persistCustomGenre(genre) {
+    const custom = loadCustomGenres();
+    if (custom.includes(genre) || GENRE_SUGGESTIONS.includes(genre)) return;
+    const updated = [...custom, genre].sort();
+    saveCustomGenres(updated);
+    // Also upsert to a Supabase metadata row as a best-effort backup
+    try {
+      await fetch(`${SB_URL}/rest/v1/books`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify({ id: '__custom_genres__', tab: '__meta__', title: '__custom_genres__',
+          notes: JSON.stringify(updated) }),
+      });
+    } catch {}
+  }
+  async function loadCustomGenresFromSupabase() {
+    try {
+      const res = await fetch(`${SB_URL}/rest/v1/books?id=eq.__custom_genres__&select=notes`, { headers: sbHeaders() });
+      const rows = await res.json();
+      if (rows && rows[0] && rows[0].notes) {
+        const remote = JSON.parse(rows[0].notes);
+        if (Array.isArray(remote)) {
+          const merged = [...new Set([...loadCustomGenres(), ...remote])].sort();
+          saveCustomGenres(merged);
+        }
+      }
+    } catch {}
+  }
+  function allGenres() {
+    return [...new Set([...GENRE_SUGGESTIONS, ...loadCustomGenres()])].sort();
+  }
+
   function renderGenreFilter(tab) {
     const el = document.getElementById('genre-filter-' + tab);
+    const btn = document.getElementById('gf-btn-' + tab);
     if (!el) return;
+
     const books = loadBooks(tab);
-    const genres = [...new Set(books.flatMap(b => b.genres || []).filter(Boolean))].sort();
-    if (!genres.length) { el.innerHTML = ''; return; }
+    const available = [...new Set(books.flatMap(b => b.genres || []).filter(Boolean))].sort();
     const cur = genreFilter[tab];
-    const btns = genres.map(g =>
-      `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}'">${esc(g)}</button>`
+    const isOpen = genreFilterOpen[tab];
+
+    // Update toggle button state
+    if (btn) {
+      btn.classList.toggle('gf-open', isOpen && !cur);
+      btn.classList.toggle('gf-active', !!cur);
+      btn.innerHTML = cur
+        ? `⊞ ${esc(cur)}<span class="gf-dot"></span>`
+        : '⊞ Genre';
+    }
+
+    if (!isOpen && !cur) { el.innerHTML = ''; return; }
+    if (!available.length) { el.innerHTML = ''; return; }
+
+    const btns = available.map(g =>
+      `<button class="btn-genre${cur === g ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}','${g.replace(/'/g,"\\'")}')">` +
+      `${esc(g)}</button>`
     ).join('');
-    el.innerHTML = `<div class="genre-filter-bar"><span class="genre-filter-label">Genre:</span>${btns}<button class="btn-genre${!cur ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}',null)">All</button></div>`;
+    el.innerHTML = `<div class="genre-filter-panel">
+      <span class="genre-filter-label">Filter:</span>
+      ${btns}
+      <button class="btn-genre${!cur ? ' btn-genre-active' : ''}" onclick="setGenreFilter('${tab}',null)">All</button>
+      <button class="btn-gf-close" onclick="closeGenreFilter('${tab}')" title="Close">✕</button>
+    </div>`;
+  }
+
+  function toggleGenreFilter(tab) {
+    genreFilterOpen[tab] = !genreFilterOpen[tab];
+    if (!genreFilterOpen[tab]) genreFilter[tab] = null;
+    render(tab);
+  }
+  function closeGenreFilter(tab) {
+    genreFilterOpen[tab] = false;
+    genreFilter[tab] = null;
+    render(tab);
   }
   function setGenreFilter(tab, genre) {
     genreFilter[tab] = genre || null;
+    if (!genre) genreFilterOpen[tab] = false;
     render(tab);
   }
 
@@ -2514,7 +2626,7 @@
   function openGenreInput(id, tab) {
     const wrap = document.getElementById('genre-wrap-' + id);
     if (!wrap || wrap.querySelector('.genre-input-popup')) return;
-    const opts = GENRE_SUGGESTIONS.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+    const opts = allGenres().map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
     wrap.insertAdjacentHTML('beforeend', `
       <div class="genre-input-popup" id="genre-popup-${id}">
         <select onchange="if(this.value){commitGenreTag('${id}','${tab}',this.value);}" >
@@ -2554,6 +2666,7 @@
     book.genres = [...genres, g];
     saveBooks(tab, books);
     sbUpsert(book, tab);
+    persistCustomGenre(g).then(refreshGenreDatalist);
     document.getElementById('genre-popup-' + id)?.remove();
     render(tab);
   }
@@ -2580,12 +2693,19 @@
 
   /* ---- INIT ---- */
   _bindAuthorEdited();
+
+  function refreshGenreDatalist() {
+    const dl = document.getElementById('genre-suggestions');
+    if (!dl) return;
+    dl.innerHTML = allGenres().map(g => `<option value="${esc(g)}">`).join('');
+  }
+
   async function init() {
-    // Render from local cache immediately so the UI isn't blank
     render('fiction');
     render('nonfiction');
-    // Then fetch from Supabase and re-render with fresh data
     setSyncStatus('loading');
+    await loadCustomGenresFromSupabase();
+    refreshGenreDatalist();
     const ok = await sbLoadAll();
     if (ok) {
       render('fiction');
