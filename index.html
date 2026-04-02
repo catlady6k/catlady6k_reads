@@ -1410,12 +1410,15 @@
       genre:         book.genres && book.genres.length ? JSON.stringify(book.genres) : (book.genre || null),
       notes:         book.notes         || null,
       date_started:  book.dateStarted   || null,
-      cover_url:     null,
     };
   }
 
   // Convert Supabase row → app book object
   function fromDb(row) {
+    // Seed cover cache from Supabase if not already locally cached
+    if (row.cover_url && getCoverCache(row.id) === null) {
+      setCoverCache(row.id, row.cover_url);
+    }
     return {
       id:           row.id,
       title:        row.title         || '',
@@ -1459,6 +1462,13 @@
       const rows = await res.json();
       saveBooks('fiction',    rows.filter(r => r.tab === 'fiction').map(fromDb));
       saveBooks('nonfiction', rows.filter(r => r.tab === 'nonfiction').map(fromDb));
+      // Seed summary caches from __meta__ summary rows
+      rows.filter(r => r.tab === '__meta__' && r.id && r.id.startsWith('__sum_')).forEach(r => {
+        const bookId = r.id.slice(6); // strip '__sum_'
+        if (getSummaryCache(bookId) === undefined && r.notes !== null) {
+          setSummaryCache(bookId, r.notes || '');
+        }
+      });
       setSyncStatus('ok');
       return true;
     } catch (e) {
@@ -1814,7 +1824,7 @@
     const cached = getCoverCache(b.id);
     const letter = esc((b.title || '?').charAt(0).toUpperCase());
     if (cached && cached !== 'none') {
-      return `<div class="book-cover-thumb" id="cover-${b.id}"><img src="https://covers.openlibrary.org/b/id/${cached}-S.jpg" alt="" class="book-cover-img" onerror="this.style.display='none';this.parentElement.classList.add('cover-placeholder');this.parentElement.innerHTML+='<span class=cover-letter>${letter}</span>'"></div>`;
+      return `<div class="book-cover-thumb" id="cover-${b.id}"><img src="${cached}" alt="" class="book-cover-img" onerror="this.style.display='none';this.parentElement.classList.add('cover-placeholder');this.parentElement.innerHTML+='<span class=cover-letter>${letter}</span>'"></div>`;
     }
     return `<div class="book-cover-thumb cover-placeholder" id="cover-${b.id}"><span class="cover-letter">${letter}</span></div>`;
   }
@@ -1928,7 +1938,7 @@
     el.innerHTML = `<table><thead><tr>${thHTML}</tr></thead><tbody>${rows}</tbody></table>`;
 
     // Kick off cover fetches for any books not yet cached
-    books.forEach(b => { if (getCoverCache(b.id) === null) fetchCoverAsync(b.id, b.title, b.author); });
+    books.forEach(b => { if (getCoverCache(b.id) === null) fetchBookDataAsync(b.id, b.title, b.author); });
   }
 
   function renderMobileCards(tab, books, el) {
@@ -1994,7 +2004,7 @@
     }).join('');
 
     el.innerHTML = `<div class="card-list">${cards}</div>`;
-    books.forEach(b => { if (getCoverCache(b.id) === null) fetchCoverAsync(b.id, b.title, b.author); });
+    books.forEach(b => { if (getCoverCache(b.id) === null) fetchBookDataAsync(b.id, b.title, b.author); });
   }
 
   function esc(str) {
@@ -2258,7 +2268,7 @@
       inner = `<div class="summary-panel"><span class="summary-panel-icon">📖</span><span>${esc(s.text)}</span></div>`;
     } else {
       const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((book.title + ' ' + book.author).trim());
-      inner = `<div class="summary-panel"><span class="summary-panel-icon">🔍</span><span class="summary-notfound">No summary found — try searching <a href="${grUrl}" target="_blank" rel="noopener noreferrer">Goodreads</a>.</span></div>`;
+      inner = `<div class="summary-panel"><span class="summary-panel-icon">🔍</span><span class="summary-notfound">No summary available — try searching <a href="${grUrl}" target="_blank" rel="noopener noreferrer">Goodreads</a>.</span></div>`;
     }
     return `<tr class="summary-row"><td colspan="10">${inner}</td></tr>`;
   }
@@ -2284,42 +2294,12 @@
   async function fetchSummary(id, tab) {
     const book = loadBooks(tab).find(b => b.id === id);
     if (!book) return;
-    try {
-      const url = `https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author || '')}&fields=key,first_sentence&limit=3`;
-      const res = await fetch(url);
-      const data = await res.json();
-      let summary = null;
-
-      // Pass 1: first_sentence from search results
-      for (const doc of (data.docs || [])) {
-        const fs = doc.first_sentence;
-        if (fs && (typeof fs === 'string' ? fs : fs.value)) {
-          summary = typeof fs === 'string' ? fs : fs.value;
-          break;
-        }
-      }
-
-      // Pass 2: fetch work description if no first_sentence
-      if (!summary && data.docs && data.docs[0] && data.docs[0].key) {
-        try {
-          const workRes = await fetch(`https://openlibrary.org${data.docs[0].key}.json`);
-          const work = await workRes.json();
-          if (work.description) {
-            summary = typeof work.description === 'string' ? work.description : (work.description.value || null);
-          }
-        } catch {}
-      }
-
-      setSummaryCache(id, summary || '');
-      if (activeSummary && activeSummary.id === id && activeSummary.tab === tab) {
-        activeSummary = { id, tab, status: summary ? 'done' : 'notfound', text: summary || '' };
-        render(tab);
-      }
-    } catch {
-      if (activeSummary && activeSummary.id === id && activeSummary.tab === tab) {
-        activeSummary = { id, tab, status: 'notfound' };
-        render(tab);
-      }
+    // Single Google Books call fetches cover + summary together and caches both
+    await fetchBookDataAsync(id, book.title, book.author);
+    if (activeSummary && activeSummary.id === id && activeSummary.tab === tab) {
+      const text = getSummaryCache(id) || '';
+      activeSummary = { id, tab, status: text ? 'done' : 'notfound', text };
+      render(tab);
     }
   }
 
@@ -2400,26 +2380,50 @@
   function setCoverCache(id, val) {
     try { localStorage.setItem(COVER_PREFIX + id, val); } catch(e) {}
   }
-  async function fetchCoverAsync(bookId, title, author) {
+  async function fetchBookDataAsync(bookId, title, author) {
     if (coverFetchPending.has(bookId)) return;
-    if (getCoverCache(bookId) !== null) return;
+    if (getCoverCache(bookId) !== null) return; // cover + summary fetched together
     coverFetchPending.add(bookId);
     try {
-      const q = encodeURIComponent((title + ' ' + (author || '')).trim());
-      const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`);
+      const q = `intitle:${encodeURIComponent(title)}+inauthor:${encodeURIComponent(author || '')}`;
+      const res  = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`);
       const data = await res.json();
-      const coverId = data.docs && data.docs[0] && data.docs[0].cover_i ? String(data.docs[0].cover_i) : 'none';
-      setCoverCache(bookId, coverId);
-      // Patch DOM if element still present
+      const info = data.items && data.items[0] && data.items[0].volumeInfo;
+
+      // --- Cover ---
+      const rawCover = info && info.imageLinks && info.imageLinks.thumbnail;
+      const coverUrl = rawCover ? rawCover.replace(/^http:\/\//, 'https://') : 'none';
+      setCoverCache(bookId, coverUrl);
+
+      // --- Summary ---
+      const summary = (info && info.description) || '';
+      setSummaryCache(bookId, summary);
+
+      // --- Persist cover URL to Supabase book row ---
+      if (coverUrl !== 'none') {
+        fetch(`${SB_URL}/rest/v1/books`, {
+          method: 'POST',
+          headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify({ id: bookId, cover_url: coverUrl }),
+        }).catch(() => {});
+      }
+
+      // --- Persist summary to Supabase as a metadata row ---
+      fetch(`${SB_URL}/rest/v1/books`, {
+        method: 'POST',
+        headers: sbHeaders({ 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+        body: JSON.stringify({ id: '__sum_' + bookId, tab: '__meta__', title: '__summary__', notes: summary }),
+      }).catch(() => {});
+
+      // --- Patch cover DOM in-place if still visible ---
       const el = document.getElementById('cover-' + bookId);
-      if (el) {
-        if (coverId !== 'none') {
-          el.innerHTML = `<img src="https://covers.openlibrary.org/b/id/${coverId}-S.jpg" alt="" style="width:34px;height:48px;object-fit:cover;border-radius:3px;display:block;">`;
-          el.classList.remove('cover-placeholder');
-        }
+      if (el && coverUrl !== 'none') {
+        el.innerHTML = `<img src="${coverUrl}" alt="" style="width:34px;height:48px;object-fit:cover;border-radius:3px;display:block;">`;
+        el.classList.remove('cover-placeholder');
       }
     } catch(e) {
       setCoverCache(bookId, 'none');
+      setSummaryCache(bookId, '');
     } finally {
       coverFetchPending.delete(bookId);
     }
