@@ -2564,8 +2564,9 @@
     const customGenres = loadCustomGenres();
     const customSet = new Set(customGenres);
     const masterSet = new Set([...GENRE_SUGGESTIONS, ...customGenres]);
-    // Only show genres that exist in the master list — deleted custom genres disappear even if books still have them
-    const available = [...new Set(books.flatMap(b => b.genres || []).filter(g => g && masterSet.has(g)))].sort();
+    // Include all custom genres + any genres actually used on books (from master list)
+    const usedOnBooks = books.flatMap(b => b.genres || []).filter(g => g && masterSet.has(g));
+    const available = [...new Set([...customGenres, ...usedOnBooks])].sort();
     _gfAvailable[tab] = available;
     const cur = genreFilter[tab];
     const isOpen = genreFilterOpen[tab];
@@ -2580,7 +2581,6 @@
     }
 
     if (!isOpen && !cur) { el.innerHTML = ''; return; }
-    if (!available.length) { el.innerHTML = ''; return; }
 
     console.log('[GenreFilter] Opening for tab:', tab, '| Custom genres in localStorage:', JSON.parse(localStorage.getItem('tbr_custom_genres') || '[]'));
 
