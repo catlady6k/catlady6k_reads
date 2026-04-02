@@ -410,6 +410,17 @@
   tbody tr:hover { background: var(--surface-hover); }
   td { padding: 11px 14px; vertical-align: middle; color: var(--text-primary); }
   .td-title { font-weight: 600; min-width: 150px; }
+  .title-link {
+    color: inherit; text-decoration: none;
+    transition: color 0.18s;
+  }
+  .title-link:hover {
+    color: var(--accent-light);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
   .td-author { color: var(--text-secondary); min-width: 120px; }
   .td-pages { color: var(--text-secondary); text-align: center; }
   .td-date { color: var(--text-muted); font-size: 0.82rem; white-space: nowrap; }
@@ -1231,7 +1242,7 @@
     <h1>Catlady6k's Reads</h1>
     <img src="https://catlady6k.github.io/catlady6k_reads/stars.png" alt="" class="header-logo header-logo-flip">
   </div>
-  <p>Aggressively optimistic reading goals</p>
+  <p>Aggressively Optimistic Reading Goals</p>
 </header>
 
 <div class="tab-bar">
@@ -1610,7 +1621,8 @@
     const count = allBooks.length;
 
     const rows = allBooks.map(b => {
-      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + b.author).trim());
+      const grUrl  = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + b.author).trim());
+      const amzUrl = 'https://www.amazon.com/s?k=' + encodeURIComponent((b.title + ' ' + b.author).trim()).replace(/%20/g, '+');
       const tabPill = `<span class="td-tab-pill td-tab-${b._tab}">${b._tab === 'fiction' ? 'Fiction' : 'Non-Fiction'}</span>`;
       const starHTML = b.status === 'Finished'
         ? (b.rating
@@ -1619,7 +1631,7 @@
         : `<span style="color:var(--gray-300)">—</span>`;
       return `<tr>
         <td>${tabPill}</td>
-        <td class="td-title">${esc(b.title)}</td>
+        <td class="td-title"><a class="title-link" href="${amzUrl}" target="_blank" rel="noopener noreferrer">${esc(b.title)}</a></td>
         <td class="td-author">${esc(b.author)}</td>
         <td class="td-pages" style="text-align:center">${b.pages || '—'}</td>
         <td><span class="status-pill ${STATUS_CLS[b.status] || 's-notstarted'}">${esc(b.status)}</span></td>
@@ -1846,7 +1858,8 @@
         ? Math.min(100, Math.round((Number(b.pagesRead) || 0) / Number(b.pages) * 100)) : 0;
       const opts = STATUSES.map(s =>
         `<option value="${s}"${b.status === s ? ' selected' : ''}>${s}</option>`).join('');
-      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + (b.author||'')).trim());
+      const grUrl  = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title + ' ' + (b.author||'')).trim());
+      const amzUrl = 'https://www.amazon.com/s?k=' + encodeURIComponent((b.title + ' ' + (b.author||'')).trim()).replace(/%20/g, '+');
 
       const progressCell = b.status === 'In Progress'
         ? `<div class="progress-wrap">
@@ -1875,7 +1888,7 @@
           <div class="title-cell">
             ${renderCoverCell(b)}
             <div class="title-cell-text">
-              <span>${esc(b.title)}</span>
+              <a class="title-link" href="${amzUrl}" target="_blank" rel="noopener noreferrer">${esc(b.title)}</a>
               ${renderGenreTags(b, tab)}
             </div>
           </div>
@@ -1924,7 +1937,8 @@
         ? Math.min(100, Math.round((Number(b.pagesRead)||0) / Number(b.pages) * 100)) : 0;
       const opts = STATUSES.map(s =>
         `<option value="${s}"${b.status===s?' selected':''}>${s}</option>`).join('');
-      const grUrl = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title+' '+(b.author||'')).trim());
+      const grUrl  = 'https://www.goodreads.com/search?q=' + encodeURIComponent((b.title+' '+(b.author||'')).trim());
+      const amzUrl = 'https://www.amazon.com/s?k=' + encodeURIComponent((b.title+' '+(b.author||'')).trim()).replace(/%20/g, '+');
       const isPicked = randomPickId[tab] === b.id;
       const isNew    = justAddedId === b.id;
 
@@ -1956,7 +1970,7 @@
         <div class="card-top">
           ${renderCoverCell(b)}
           <div class="card-info">
-            <div class="card-title">${esc(b.title)}</div>
+            <div class="card-title"><a class="title-link" href="${amzUrl}" target="_blank" rel="noopener noreferrer">${esc(b.title)}</a></div>
             <div class="card-author">${esc(b.author||'')}</div>
             ${renderGenreTags(b, tab)}
             <select class="status-select ${STATUS_CLS[b.status]||'s-notstarted'}"
