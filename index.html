@@ -404,6 +404,7 @@
   th.sort-desc::after { content: ' ↓'; color: var(--accent-light); }
   th.sort-sec-asc::after  { content: ' ↑'; color: var(--clay-light); opacity: 0.8; }
   th.sort-sec-desc::after { content: ' ↓'; color: var(--clay-light); opacity: 0.8; }
+  th.sort-none::after { content: ' ·'; color: var(--border-mid); }
   tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
   tbody tr:nth-child(even) { background: rgba(255,255,255,0.018); }
   tbody tr:last-child { border-bottom: none; }
@@ -567,6 +568,79 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ---- FINISH DATE PROMPT ---- */
+  .finish-date-prompt {
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+    margin-top: 6px; padding: 6px 8px;
+    background: var(--surface-2); border: 1px solid var(--accent-dark);
+    border-radius: 7px; font-size: 0.75rem; animation: fadeIn 0.15s ease;
+  }
+  .fdp-label { color: var(--text-muted); white-space: nowrap; font-weight: 500; }
+  .fdp-input { padding: 3px 7px; font-size: 0.75rem; max-width: 130px; }
+  .fdp-btn {
+    padding: 3px 9px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 0.72rem; font-weight: 700; font-family: inherit; transition: all 0.15s;
+  }
+  .fdp-ok   { background: var(--accent); color: #fff; }
+  .fdp-ok:hover { background: var(--accent-light); }
+  .fdp-skip { background: var(--surface-3); color: var(--text-muted); border: 1px solid var(--border); }
+  .fdp-skip:hover { color: var(--text-primary); border-color: var(--border-mid); }
+
+  /* ---- MICRO-ANIMATIONS ---- */
+
+  /* Status badge smooth color transition + pulse on change */
+  .status-select {
+    transition: background-color 0.25s ease, color 0.25s ease,
+                border-color 0.25s ease, opacity 0.15s, box-shadow 0.15s !important;
+  }
+  @keyframes statusPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .status-pulse { animation: statusPulse 0.22s ease-out; }
+
+  /* Row finished flash */
+  @keyframes finishedFlash {
+    0%   { background: rgba(18,136,64,0.0); }
+    30%  { background: rgba(18,136,64,0.22); }
+    100% { background: rgba(18,136,64,0.0); }
+  }
+  .row-finished-flash { animation: finishedFlash 0.7s ease-out; }
+
+  /* Star sequential pop on save */
+  @keyframes starPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.45); }
+    100% { transform: scale(1); }
+  }
+  .star-pop { animation: starPop 0.22s ease-out; }
+
+  /* Genre tag slide-in */
+  @keyframes tagSlideIn {
+    from { opacity: 0; transform: translateX(-8px) scale(0.88); max-width: 0; padding-left: 0; padding-right: 0; }
+    to   { opacity: 1; transform: translateX(0) scale(1);        max-width: 140px; }
+  }
+  .genre-tag-new { animation: tagSlideIn 0.2s ease-out forwards; }
+
+  /* Genre tag slide-out */
+  @keyframes tagSlideOut {
+    from { opacity: 1; transform: scale(1);    max-width: 140px; }
+    to   { opacity: 0; transform: scale(0.75); max-width: 0; padding-left: 0; padding-right: 0; margin: 0; }
+  }
+  .genre-tag-removing { animation: tagSlideOut 0.18s ease-in forwards; overflow: hidden; }
+
+  /* Stat number count-up highlight */
+  @keyframes statUpdate {
+    0%   { opacity: 0.4; transform: scale(0.92); }
+    60%  { transform: scale(1.06); }
+    100% { opacity: 1;   transform: scale(1); }
+  }
+  .stat-number-update { animation: statUpdate 0.28s ease-out; }
+
+  /* Row hover — already 0.12s but make it 0.18s for smoothness */
+  tbody tr { transition: background 0.18s ease !important; }
+
   /* STAR RATING */
   .td-rating { white-space: nowrap; }
   .star-row { display: inline-flex; }
@@ -720,6 +794,8 @@
   .year-drill-author { color: var(--text-muted); font-size: 0.78rem; margin-top: 1px; }
   .year-drill-stars { color: var(--accent-light); letter-spacing: 1px; font-size: 0.82rem; white-space: nowrap; flex-shrink: 0; }
   .year-drill-empty { padding: 28px 18px; text-align: center; color: var(--text-muted); font-size: 0.88rem; font-style: italic; }
+  .tl-book-link { cursor: pointer; transition: color 0.15s; }
+  .tl-book-link:hover { color: var(--accent-light); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 2px; }
 
   /* RESPONSIVE */
   @media (max-width: 700px) {
@@ -956,6 +1032,104 @@
   }
   .btn-gf-cancel:hover { color: var(--text-primary); }
 
+  /* ---- READING TIMELINE (contribution graph) ---- */
+  .timeline-section { width: 100%; padding: 0 20px 32px; }
+  .timeline-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px; gap: 10px;
+  }
+  .timeline-title {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 12px; flex: 1;
+  }
+  .timeline-title::before { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .timeline-year-nav {
+    display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  }
+  .btn-tl-year {
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-muted); cursor: pointer; font-size: 0.78rem; font-weight: 600;
+    font-family: inherit; padding: 3px 9px; transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .btn-tl-year:hover { border-color: var(--clay); color: var(--clay-light); }
+  .btn-tl-year.tl-year-active { border-color: var(--accent); color: var(--accent-light); background: rgba(255,26,108,0.08); }
+  .btn-tl-nav {
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-family: inherit;
+    padding: 2px 8px; line-height: 1.4; transition: all 0.15s; touch-action: manipulation;
+  }
+  .btn-tl-nav:hover { border-color: var(--clay); color: var(--clay-light); }
+  .timeline-graph-wrap {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px 14px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .timeline-graph {
+    display: inline-flex; gap: 0; align-items: flex-start; position: relative;
+    min-width: max-content;
+  }
+  .tl-labels-col {
+    display: flex; flex-direction: column; gap: 2px;
+    margin-right: 6px; padding-top: 18px; /* align with squares below month labels */
+  }
+  .tl-dow-label {
+    height: 13px; font-size: 0.6rem; color: var(--text-muted);
+    line-height: 13px; text-align: right; width: 14px; font-weight: 600;
+  }
+  .tl-months-row {
+    display: flex; gap: 0; height: 18px; margin-bottom: 2px; align-items: flex-end;
+  }
+  .tl-month-label {
+    font-size: 0.6rem; color: var(--text-muted); font-weight: 600;
+    white-space: nowrap; line-height: 1;
+  }
+  .tl-weeks-wrap { display: flex; flex-direction: column; gap: 0; }
+  .tl-weeks-row { display: flex; gap: 2px; }
+  .tl-week-col { display: flex; flex-direction: column; gap: 2px; }
+  .tl-day {
+    width: 13px; height: 13px; border-radius: 2px;
+    background: #2A0010; cursor: default; flex-shrink: 0;
+    transition: filter 0.12s, transform 0.1s;
+    position: relative;
+  }
+  .tl-day.tl-day-empty { pointer-events: none; background: transparent; }
+  .tl-day.tl-day-has-book {
+    cursor: pointer;
+    background: var(--accent);
+  }
+  .tl-day.tl-day-has-book:hover { filter: brightness(1.3); transform: scale(1.25); z-index: 5; }
+  .tl-day.tl-day-has-book[data-count="2"] { background: #FF1A6C; filter: brightness(1.15); }
+  .tl-day.tl-day-has-book[data-count="3"] { background: #FF1A6C; filter: brightness(1.3); }
+  .tl-day.tl-day-future { background: transparent; pointer-events: none; }
+  .tl-tooltip {
+    position: fixed; z-index: 9999; pointer-events: none;
+    background: var(--surface-3); border: 1px solid var(--border-mid);
+    border-radius: 7px; padding: 7px 11px; font-size: 0.75rem;
+    color: var(--text-primary); box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+    max-width: 240px; line-height: 1.5;
+  }
+  .tl-tooltip-date { font-weight: 700; color: var(--accent-light); margin-bottom: 3px; }
+  .tl-legend {
+    display: flex; align-items: center; gap: 6px; margin-top: 10px;
+    font-size: 0.62rem; color: var(--text-muted);
+  }
+  .tl-legend-swatch {
+    width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0;
+  }
+  @keyframes rowHighlight {
+    0%   { box-shadow: inset 0 0 0 2px var(--accent), 0 0 18px var(--accent-glow-strong); background: rgba(255,26,108,0.10); }
+    70%  { box-shadow: inset 0 0 0 1px var(--accent-dark), 0 0 8px var(--accent-glow); background: rgba(255,26,108,0.04); }
+    100% { box-shadow: none; background: transparent; }
+  }
+  .row-highlight { animation: rowHighlight 1.4s ease-out; }
+
+  @media (max-width: 700px) {
+    .timeline-section { padding: 0 12px 24px; }
+    .timeline-graph-wrap { padding: 12px 10px 10px; }
+  }
+
   /* Reading goal bar */
   .goal-bar-section { width: 100%; padding: 4px 20px 20px; }
   .goal-bar-empty { text-align: center; padding: 10px 0; }
@@ -1180,6 +1354,20 @@
 
     /* Filter strip — wrap on small screens */
     .filter-strip { flex-wrap: wrap; row-gap: 6px; }
+
+    /* Timeline day squares — slightly larger for easier tapping */
+    .tl-day { width: 15px; height: 15px; }
+    .tl-dow-label { height: 15px; line-height: 15px; }
+    .tl-legend-swatch { width: 15px; height: 15px; }
+
+    /* Finish date prompt — stack vertically on narrow screens */
+    .finish-date-prompt {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 7px;
+    }
+    .fdp-input { max-width: 100%; width: 100%; }
+    .fdp-btn { min-height: 40px; padding: 0 18px; font-size: 0.82rem; }
   }
 
   /* UTIL BAR */
@@ -1360,6 +1548,25 @@
 
 <!-- CROSS-TAB COMBINED VIEW -->
 <div id="cross-tab-panel"></div>
+
+<!-- READING TIMELINE -->
+<div class="timeline-section">
+  <div class="timeline-header">
+    <div class="timeline-title">Reading Activity</div>
+    <div class="timeline-year-nav" id="tl-year-nav"></div>
+  </div>
+  <div class="timeline-graph-wrap">
+    <div id="timeline-graph"></div>
+    <div class="tl-legend">
+      <span>Less</span>
+      <div class="tl-legend-swatch" style="background:#2A0010"></div>
+      <div class="tl-legend-swatch" style="background:#A01040"></div>
+      <div class="tl-legend-swatch" style="background:#CC1455"></div>
+      <div class="tl-legend-swatch" style="background:#FF1A6C"></div>
+      <span>More</span>
+    </div>
+  </div>
+</div>
 
 <!-- READING GOAL -->
 <div id="goal-bar" class="goal-bar-section"></div>
@@ -1558,12 +1765,14 @@
   function sortBooks(books, col, dir, statusDir) {
     const sorted = [...books];
     sorted.sort((a, b) => {
-      // Primary: always status
-      const ao = STATUS_ORDER[a.status] ?? 9, bo = STATUS_ORDER[b.status] ?? 9;
-      if (ao !== bo) return statusDir === 'desc' ? bo - ao : ao - bo;
+      // Primary: status sort (skip if statusDir is null = unsorted)
+      if (statusDir !== null && statusDir !== undefined) {
+        const ao = STATUS_ORDER[a.status] ?? 9, bo = STATUS_ORDER[b.status] ?? 9;
+        if (ao !== bo) return statusDir === 'desc' ? bo - ao : ao - bo;
+      }
 
-      // Secondary: user-selected column (skip if none or if status was clicked)
-      if (col && col !== 'status') {
+      // Secondary: user-selected column (skip if none/null)
+      if (col && col !== 'status' && dir !== null) {
         let av = a[col], bv = b[col];
         if (col === 'pages' || col === 'pagesRead' || col === 'rating') { av = Number(av) || 0; bv = Number(bv) || 0; }
         else if (col === 'owned') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
@@ -1684,31 +1893,60 @@
     renderGenreFilter(tab);
     renderTable(tab, sorted, sortState);
     renderYearStats();
+    renderTimeline();
     renderGoalBar();
     if (crossTabView) renderCrossTabPanel(crossTabView);
   }
 
   function renderStats(tab, books) {
-    const total = books.length;
+    const total      = books.length;
     const inProgress = books.filter(b => b.status === 'In Progress').length;
     const finished   = books.filter(b => b.status === 'Finished').length;
     const pagesRead  = books.reduce((sum, b) =>
       sum + (b.status === 'Finished' ? (Number(b.pages) || 0) : (Number(b.pagesRead) || 0)), 0);
-    const f = statFilter[tab];
-    document.getElementById('stats-' + tab).innerHTML = `
+    const f   = statFilter[tab];
+    const el  = document.getElementById('stats-' + tab);
+
+    // Read previous values so we only animate numbers that actually changed
+    const prev = {};
+    el.querySelectorAll('.stat-number[data-key]').forEach(n => { prev[n.dataset.key] = Number(n.dataset.val); });
+
+    el.innerHTML = `
       <div class="stat-card filterable" onclick="setStatFilter('${tab}', null)" title="Show all books">
-        <div class="stat-number">${total}</div><div class="stat-label">Total Books</div>
+        <div class="stat-number" data-key="total" data-val="${total}">${total}</div><div class="stat-label">Total Books</div>
       </div>
       <div class="stat-card filterable${f === 'In Progress' ? ' stat-active' : ''}" onclick="setStatFilter('${tab}', 'In Progress')" title="Filter: In Progress">
-        <div class="stat-number">${inProgress}</div><div class="stat-label">In Progress</div>
+        <div class="stat-number" data-key="inprogress" data-val="${inProgress}">${inProgress}</div><div class="stat-label">In Progress</div>
       </div>
       <div class="stat-card filterable${f === 'Finished' ? ' stat-active' : ''}" onclick="setStatFilter('${tab}', 'Finished')" title="Filter: Finished">
-        <div class="stat-number">${finished}</div><div class="stat-label">Finished</div>
+        <div class="stat-number" data-key="finished" data-val="${finished}">${finished}</div><div class="stat-label">Finished</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number">${pagesRead.toLocaleString()}</div><div class="stat-label">Pages Read</div>
+        <div class="stat-number" data-key="pages" data-val="${pagesRead}">${pagesRead.toLocaleString()}</div><div class="stat-label">Pages Read</div>
       </div>
     `;
+
+    // Animate numbers that changed
+    el.querySelectorAll('.stat-number[data-key]').forEach(numEl => {
+      const key    = numEl.dataset.key;
+      const target = Number(numEl.dataset.val);
+      if (prev[key] === undefined || prev[key] === target) return;
+      const start    = prev[key];
+      const delta    = target - start;
+      const duration = Math.min(400, Math.abs(delta) * 18 + 80);
+      const t0       = performance.now();
+      function tick(now) {
+        const p = Math.min(1, (now - t0) / duration);
+        const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+        const val  = Math.round(start + delta * ease);
+        numEl.textContent = key === 'pages' ? val.toLocaleString() : val;
+        if (p < 1) requestAnimationFrame(tick);
+        else numEl.textContent = key === 'pages' ? target.toLocaleString() : target;
+      }
+      numEl.classList.add('stat-number-update');
+      numEl.addEventListener('animationend', () => numEl.classList.remove('stat-number-update'), { once: true });
+      requestAnimationFrame(tick);
+    });
   }
 
   function renderYearStats() {
@@ -1762,6 +2000,213 @@
     activeYearView = null;
     renderYearStats();
     document.getElementById('year-drill-panel').innerHTML = '';
+  }
+
+  /* ---- READING TIMELINE ---- */
+  let _tlYear = new Date().getFullYear();
+  const _TL_YEARS = [2024, 2025, 2026];
+  let _tlTooltipEl = null;
+
+  function renderTimeline() {
+    const graphEl  = document.getElementById('timeline-graph');
+    const navEl    = document.getElementById('tl-year-nav');
+    if (!graphEl || !navEl) return;
+
+    const year = _tlYear;
+    const today = new Date();
+
+    // Build a map: 'YYYY-MM-DD' → [book titles]
+    const dayMap = {};
+    [...loadBooks('fiction'), ...loadBooks('nonfiction')].forEach(b => {
+      if (b.status === 'Finished' && b.dateFinished) {
+        const d = b.dateFinished.slice(0, 10);
+        if (d.startsWith(String(year))) {
+          if (!dayMap[d]) dayMap[d] = [];
+          dayMap[d].push(b.title);
+        }
+      }
+    });
+
+    // Year nav buttons
+    navEl.innerHTML = `<button class="btn-tl-nav" onclick="_tlNav(-1)">&#8249;</button>` +
+      _TL_YEARS.map(y =>
+        `<button class="btn-tl-year${y === year ? ' tl-year-active' : ''}" onclick="_tlSetYear(${y})">${y}</button>`
+      ).join('') +
+      `<button class="btn-tl-nav" onclick="_tlNav(1)">&#8250;</button>`;
+
+    // Jan 1 of the year — find its day-of-week (0=Sun)
+    const jan1 = new Date(year, 0, 1);
+    // We want Mon=0 … Sun=6 layout (GitHub style: Sun first, but Mon-first is more readable)
+    // Use Sun=0 col to match GitHub exactly
+    const startDow = jan1.getDay(); // 0=Sun
+
+    const totalDays = ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365;
+
+    // Build week columns: array of 7-slot arrays
+    const weeks = [];
+    let week = new Array(startDow).fill(null); // pad start
+    for (let d = 0; d < totalDays; d++) {
+      const date = new Date(year, 0, d + 1);
+      const iso  = date.toISOString().slice(0, 10);
+      week.push({ iso, date });
+      if (week.length === 7) { weeks.push(week); week = []; }
+    }
+    if (week.length) {
+      while (week.length < 7) week.push(null);
+      weeks.push(week);
+    }
+
+    // Month label positions: track which column each month first appears in
+    const monthLabels = [];
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let lastMonth = -1;
+    weeks.forEach((wk, wi) => {
+      wk.forEach(slot => {
+        if (!slot) return;
+        const m = slot.date.getMonth();
+        if (m !== lastMonth) { monthLabels.push({ col: wi, label: MONTHS[m] }); lastMonth = m; }
+      });
+    });
+
+    const DOW_LABELS = ['S','M','T','W','T','F','S'];
+    const SHOW_DOW   = [false, true, false, true, false, true, false]; // show M W F
+
+    // Square size + gap must match CSS (13px + 2px gap = 15px per cell)
+    const CELL = 15;
+
+    // Build month labels row HTML
+    let monthHTML = '';
+    for (let i = 0; i < monthLabels.length; i++) {
+      const { col, label } = monthLabels[i];
+      const nextCol = monthLabels[i + 1] ? monthLabels[i + 1].col : weeks.length;
+      const width = (nextCol - col) * CELL;
+      monthHTML += `<div class="tl-month-label" style="width:${width}px">${label}</div>`;
+    }
+
+    // Build week columns HTML
+    const weeksHTML = weeks.map(wk => {
+      const cells = wk.map(slot => {
+        if (!slot) return `<div class="tl-day tl-day-empty"></div>`;
+        const isFuture = slot.date > today;
+        if (isFuture) return `<div class="tl-day tl-day-future"></div>`;
+        const books = dayMap[slot.iso];
+        if (books && books.length) {
+          const count = Math.min(books.length, 3);
+          const titles = books.map(t => esc(t)).join('<br>');
+          return `<div class="tl-day tl-day-has-book" data-count="${count}"
+            data-date="${slot.iso}" data-titles="${books.map(t => t.replace(/"/g,'&quot;')).join('|')}"
+            onmouseenter="tlShowTip(event,this)" onmouseleave="tlHideTip()"
+            ontouchstart="tlShowTip(event,this)" ontouchend="tlHideTip()"
+            onclick="tlDayClick('${slot.iso}')"></div>`;
+        }
+        return `<div class="tl-day"></div>`;
+      }).join('');
+      return `<div class="tl-week-col">${cells}</div>`;
+    }).join('');
+
+    // DOW label column
+    const dowHTML = DOW_LABELS.map((l, i) =>
+      `<div class="tl-dow-label">${SHOW_DOW[i] ? l : ''}</div>`
+    ).join('');
+
+    graphEl.innerHTML = `
+      <div class="timeline-graph">
+        <div class="tl-labels-col">${dowHTML}</div>
+        <div>
+          <div class="tl-months-row">${monthHTML}</div>
+          <div class="tl-weeks-row">${weeksHTML}</div>
+        </div>
+      </div>`;
+  }
+
+  function _tlSetYear(y) { _tlYear = y; renderTimeline(); }
+  function _tlNav(dir) {
+    const idx = _TL_YEARS.indexOf(_tlYear);
+    const next = _TL_YEARS[idx + dir];
+    if (next !== undefined) { _tlYear = next; renderTimeline(); }
+  }
+
+  function tlShowTip(e, el) {
+    if (!_tlTooltipEl) {
+      _tlTooltipEl = document.createElement('div');
+      _tlTooltipEl.className = 'tl-tooltip';
+      document.body.appendChild(_tlTooltipEl);
+    }
+    const date   = el.dataset.date;
+    const titles = el.dataset.titles.split('|');
+    const fmt    = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    _tlTooltipEl.innerHTML = `<div class="tl-tooltip-date">${fmt}</div>${titles.map(t => esc(t)).join('<br>')}`;
+    _tlTooltipEl.style.display = 'block';
+    _tlPositionTip(e);
+  }
+  function _tlPositionTip(e) {
+    if (!_tlTooltipEl) return;
+    // Support both mouse and touch events
+    const src = e.changedTouches ? e.changedTouches[0] : e;
+    const x = src.clientX + 14, y = src.clientY - 10;
+    const tw = _tlTooltipEl.offsetWidth, th = _tlTooltipEl.offsetHeight;
+    _tlTooltipEl.style.left = (x + tw > window.innerWidth  ? x - tw - 20 : x) + 'px';
+    _tlTooltipEl.style.top  = (y + th > window.innerHeight ? y - th       : y) + 'px';
+  }
+  function tlHideTip() {
+    if (_tlTooltipEl) _tlTooltipEl.style.display = 'none';
+  }
+
+  function tlDayClick(iso) {
+    const allBooks = [
+      ...loadBooks('fiction').map(b => ({ ...b, _tab: 'fiction' })),
+      ...loadBooks('nonfiction').map(b => ({ ...b, _tab: 'nonfiction' }))
+    ];
+    const onDay = allBooks.filter(b => b.status === 'Finished' && b.dateFinished && b.dateFinished.slice(0,10) === iso);
+    if (!onDay.length) return;
+    const drillEl = document.getElementById('year-drill-panel');
+    if (!drillEl) return;
+    tlHideTip();
+    const fmt = new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const rows = onDay.map(b => {
+      const pill  = `<span class="td-tab-pill td-tab-${b._tab}">${b._tab === 'fiction' ? 'Fiction' : 'Non-Fiction'}</span>`;
+      const stars = b.rating
+        ? `<span class="year-drill-stars">${'★'.repeat(b.rating)}${'☆'.repeat(5-b.rating)}</span>`
+        : `<span class="year-drill-stars" style="color:var(--border-mid)">✩✩✩✩✩</span>`;
+      return `<div class="year-drill-row">${pill}
+        <div class="year-drill-info">
+          <div class="year-drill-book-title tl-book-link" onclick="scrollToBook('${b.id}','${b._tab}')" title="Go to book">${esc(b.title)}</div>
+          <div class="year-drill-author">${esc(b.author || '—')}</div>
+        </div>${stars}</div>`;
+    }).join('');
+    drillEl.innerHTML = `<div class="year-drill-wrap">
+      <div class="year-drill-header">
+        <div>
+          <span class="year-drill-title"><em>${fmt}</em></span>
+          <span class="year-drill-subtitle">${onDay.length} book${onDay.length !== 1 ? 's' : ''} finished</span>
+        </div>
+        <button class="btn-year-close" onclick="document.getElementById('year-drill-panel').innerHTML=''" title="Close">✕</button>
+      </div>
+      <div class="year-drill-list">${rows}</div>
+    </div>`;
+    drillEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function scrollToBook(id, tab) {
+    // Switch to correct tab if needed
+    const activePanel = document.querySelector('.tab-panel.active');
+    if (!activePanel || activePanel.id !== 'panel-' + tab) {
+      switchTab(tab);
+      render(tab);
+    }
+    // Wait for render then scroll — works for both table rows (desktop) and cards (mobile)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`tr[data-book-id="${id}"]`) ||
+                   document.querySelector(`.book-card[data-book-id="${id}"]`);
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.remove('row-highlight');
+        void el.offsetWidth;
+        el.classList.add('row-highlight');
+        el.addEventListener('animationend', () => el.classList.remove('row-highlight'), { once: true });
+      });
+    });
   }
 
   function renderYearDrill(year, tab) {
@@ -1836,7 +2281,6 @@
       { key: 'author',       label: 'Author',        cls: 'td-author',   sortable: true  },
       { key: 'pages',        label: 'Pages',         cls: 'td-pages',    sortable: true  },
       { key: 'status',       label: 'Status',        cls: '',            sortable: true  },
-      { key: 'dateFinished', label: 'Date Finished', cls: 'td-date',     sortable: false },
       { key: 'rating',       label: 'Rating',        cls: 'td-rating',   sortable: true  },
       { key: 'owned',        label: 'Owned',         cls: 'td-owned',    sortable: true  },
       { key: 'pagesRead',    label: 'Progress',      cls: 'td-progress', sortable: false },
@@ -1846,9 +2290,10 @@
     const thHTML = cols.map(c => {
       let cls = c.sortable ? 'sortable' : '';
       if (c.key === 'status') {
-        cls += (sortState.statusDir || 'asc') === 'asc' ? ' sort-asc' : ' sort-desc';
+        const sd = sortState.statusDir;
+        cls += sd === 'asc' ? ' sort-asc' : sd === 'desc' ? ' sort-desc' : sd === null ? ' sort-none' : ' sort-asc';
       } else if (sortState.col === c.key) {
-        cls += sortState.dir === 'asc' ? ' sort-sec-asc' : ' sort-sec-desc';
+        cls += sortState.dir === 'asc' ? ' sort-sec-asc' : sortState.dir === 'desc' ? ' sort-sec-desc' : '';
       }
       return `<th class="${cls}" ${c.sortable ? `onclick="handleSort('${tab}','${c.key}')"` : ''}>${c.label}</th>`;
     }).join('') + '<th></th>';
@@ -1870,10 +2315,6 @@
                <span class="progress-label">${b.pagesRead || 0} / ${b.pages || '?'} pages — ${pct}%</span>
              </div></div>`
         : `<span style="color:var(--gray-300);font-size:0.8rem">—</span>`;
-
-      const dateCell = b.status === 'Finished'
-        ? `<input class="date-input" type="date" value="${b.dateFinished || ''}" data-id="${b.id}" data-tab="${tab}" onchange="updateDate(this)">`
-        : `<span style="color:var(--gray-300)">—</span>`;
 
       const isPicked = randomPickId[tab] === b.id;
       const isNew    = justAddedId === b.id;
@@ -1899,7 +2340,6 @@
           <select class="status-select ${STATUS_CLS[b.status] || 's-notstarted'}"
             data-id="${b.id}" data-tab="${tab}" onchange="changeStatus(this)">${opts}</select>
         </td>
-        <td class="td-date" data-label="Date Finished">${dateCell}</td>
         <td class="td-rating" data-label="Rating">${b.status === 'Finished'
           ? `<div class="star-row">${[1,2,3,4,5].map(i =>
               `<button class="star-btn${(b.rating||0)>=i?' filled':''}" data-id="${b.id}" data-tab="${tab}" data-star="${i}" onclick="setRating(this)">★</button>`
@@ -2082,16 +2522,80 @@
     const books = loadBooks(tab);
     const book = books.find(b => b.id === id);
     if (!book) return;
+    const wasFinished = book.status === 'Finished';
     book.status = select.value;
-    if (book.status === 'Finished') {
-      book.dateFinished = book.dateFinished || today();
-      triggerConfetti();
-    } else {
+    if (book.status === 'Finished' && !wasFinished) {
+      // Show inline date picker in the row before saving
+      _promptFinishDate(select, book, tab);
+      return;
+    } else if (book.status !== 'Finished') {
       book.dateFinished = '';
     }
+    _applyStatusChange(select, book, tab, wasFinished);
+  }
+
+  function _applyStatusChange(select, book, tab, wasFinished) {
+    const books = loadBooks(tab);
+    const idx = books.findIndex(b => b.id === book.id);
+    if (idx !== -1) books[idx] = book;
     saveBooks(tab, books);
+    select.classList.remove('status-pulse');
+    void select.offsetWidth;
+    select.classList.add('status-pulse');
+    select.addEventListener('animationend', () => select.classList.remove('status-pulse'), { once: true });
+    if (!wasFinished && book.status === 'Finished') {
+      triggerConfetti();
+      const row = select.closest('tr');
+      if (row) {
+        row.classList.remove('row-finished-flash');
+        void row.offsetWidth;
+        row.classList.add('row-finished-flash');
+        row.addEventListener('animationend', () => row.classList.remove('row-finished-flash'), { once: true });
+      }
+    }
     render(tab);
     sbUpsert(book, tab);
+  }
+
+  function _promptFinishDate(select, book, tab) {
+    // Insert a small inline prompt below the status select
+    const existing = document.getElementById('finish-date-prompt-' + book.id);
+    if (existing) existing.remove();
+    const defaultDate = today();
+    const prompt = document.createElement('div');
+    prompt.id = 'finish-date-prompt-' + book.id;
+    prompt.className = 'finish-date-prompt';
+    prompt.innerHTML =
+      `<span class="fdp-label">When did you finish?</span>
+       <input type="date" class="date-input fdp-input" value="${defaultDate}" id="fdp-input-${book.id}">
+       <button class="fdp-btn fdp-ok" onclick="confirmFinishDate('${book.id}','${tab}')">✓</button>
+       <button class="fdp-btn fdp-skip" onclick="confirmFinishDate('${book.id}','${tab}',true)">Skip</button>`;
+    // Works in both table (td) and mobile card (no td) layouts
+    const container = select.closest('td') || select.parentNode;
+    container.appendChild(prompt);
+    const inp = document.getElementById('fdp-input-' + book.id);
+    if (inp) {
+      inp.focus();
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Enter') confirmFinishDate(book.id, tab);
+        if (e.key === 'Escape') confirmFinishDate(book.id, tab, true);
+      });
+    }
+  }
+
+  function confirmFinishDate(id, tab, skip) {
+    const prompt = document.getElementById('finish-date-prompt-' + id);
+    const inp    = document.getElementById('fdp-input-' + id);
+    const date   = (!skip && inp && inp.value) ? inp.value : today();
+    if (prompt) prompt.remove();
+    const books = loadBooks(tab);
+    const book  = books.find(b => b.id === id);
+    if (!book) return;
+    book.dateFinished = date;
+    _applyStatusChange(
+      document.querySelector(`select[data-id="${id}"][data-tab="${tab}"]`) || { classList: { remove(){}, add(){}, contains(){} }, addEventListener(){} },
+      book, tab, false
+    );
   }
 
   function updatePagesRead(input) {
@@ -2140,12 +2644,18 @@
   function handleSort(tab, col) {
     const state = loadSortState(tab);
     if (col === 'status') {
-      // Toggle the primary status sort direction; leave secondary unchanged
-      state.statusDir = (state.statusDir || 'asc') === 'asc' ? 'desc' : 'asc';
+      // Three-state: asc → desc → null (unsorted)
+      const cur = state.statusDir || 'asc';
+      state.statusDir = cur === 'asc' ? 'desc' : cur === 'desc' ? null : 'asc';
     } else {
-      // Set or toggle secondary sort; leave status direction unchanged
-      state.dir = state.col === col ? (state.dir === 'asc' ? 'desc' : 'asc') : 'asc';
-      state.col = col;
+      if (state.col !== col) {
+        // New column: start ascending
+        state.col = col; state.dir = 'asc';
+      } else {
+        // Same column: asc → desc → unsorted
+        state.dir = state.dir === 'asc' ? 'desc' : state.dir === 'desc' ? null : 'asc';
+        if (state.dir === null) state.col = null;
+      }
     }
     saveSortState(tab, state);
     render(tab);
@@ -2245,7 +2755,17 @@
     sbUpsert(book, tab);
     // Patch stars inline — no full re-render needed
     const stars = btn.closest('.star-row').querySelectorAll('.star-btn');
-    stars.forEach((s, i) => s.classList.toggle('filled', book.rating >= i + 1));
+    stars.forEach((s, i) => {
+      s.classList.toggle('filled', book.rating >= i + 1);
+      if (book.rating >= i + 1) {
+        setTimeout(() => {
+          s.classList.remove('star-pop');
+          void s.offsetWidth;
+          s.classList.add('star-pop');
+          s.addEventListener('animationend', () => s.classList.remove('star-pop'), { once: true });
+        }, i * 55);
+      }
+    });
   }
 
   /* ---- SUMMARY ---- */
@@ -2406,10 +2926,30 @@
   function setCoverCache(id, val) {
     try { localStorage.setItem(COVER_PREFIX + id, val); } catch(e) {}
   }
-  async function fetchCoverAsync(bookId, title, author) {
+  const _coverQueue = [];
+  let _coverRunning = 0;
+  const COVER_CONCURRENCY = 3;
+
+  function fetchCoverAsync(bookId, title, author) {
     if (coverFetchPending.has(bookId)) return;
     if (getCoverCache(bookId) !== null) return;
     coverFetchPending.add(bookId);
+    _coverQueue.push({ bookId, title, author });
+    _drainCoverQueue();
+  }
+
+  function _drainCoverQueue() {
+    while (_coverRunning < COVER_CONCURRENCY && _coverQueue.length > 0) {
+      const item = _coverQueue.shift();
+      _coverRunning++;
+      _fetchCoverItem(item).finally(() => {
+        _coverRunning--;
+        _drainCoverQueue();
+      });
+    }
+  }
+
+  async function _fetchCoverItem({ bookId, title, author }) {
     try {
       const q = encodeURIComponent((title + ' ' + (author || '')).trim());
       const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i`);
@@ -2771,16 +3311,40 @@
     persistCustomGenre(g).then(refreshGenreDatalist);
     document.getElementById('genre-popup-' + id)?.remove();
     render(tab);
+    // Animate the newly added tag (last tag in this book's tag list)
+    requestAnimationFrame(() => {
+      const wrap = document.querySelector(`#cover-${id}`)?.closest('td')?.querySelector('.genre-tags-wrap');
+      if (wrap) {
+        const tags = wrap.querySelectorAll('.genre-tag');
+        const last = tags[tags.length - 1];
+        if (last) { last.classList.add('genre-tag-new'); last.addEventListener('animationend', () => last.classList.remove('genre-tag-new'), { once: true }); }
+      }
+    });
   }
 
   function removeGenreTag(id, tab, idx) {
-    const books = loadBooks(tab);
-    const book = books.find(b => b.id === id);
-    if (!book) return;
-    book.genres = (book.genres || []).filter((_, i) => i !== idx);
-    saveBooks(tab, books);
-    sbUpsert(book, tab);
-    render(tab);
+    // Find the tag element and animate it out before re-rendering
+    const tagEl = document.querySelector(`[onclick="removeGenreTag('${id}','${tab}',${idx})"]`)?.closest('.genre-tag');
+    if (tagEl) {
+      tagEl.classList.add('genre-tag-removing');
+      tagEl.addEventListener('animationend', () => {
+        const books = loadBooks(tab);
+        const book = books.find(b => b.id === id);
+        if (!book) return;
+        book.genres = (book.genres || []).filter((_, i) => i !== idx);
+        saveBooks(tab, books);
+        sbUpsert(book, tab);
+        render(tab);
+      }, { once: true });
+    } else {
+      const books = loadBooks(tab);
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+      book.genres = (book.genres || []).filter((_, i) => i !== idx);
+      saveBooks(tab, books);
+      sbUpsert(book, tab);
+      render(tab);
+    }
   }
 
   /* ---- RESIZE HANDLER ---- */
