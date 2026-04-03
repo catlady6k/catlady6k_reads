@@ -176,28 +176,76 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
+    width: 100%;
     margin-bottom: 20px;
   }
   .stat-card {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, #280010 0%, #1E0008 55%, #160005 100%);
+    border: 1px solid rgba(255, 26, 108, 0.30);
+    border-radius: 12px;
+    padding: 22px 18px 18px;
     text-align: center;
-    border-top: 3px solid var(--accent);
-    transition: transform 0.15s, border-top-color 0.2s;
+    cursor: default;
+    box-shadow: 0 2px 18px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,26,108,0.09);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
   }
-  .stat-card:hover { transform: translateY(-2px); border-top-color: var(--accent-light); }
+  /* Decorative star — top-right corner */
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 9px; right: 10px;
+    width: 22px; height: 22px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' fill='%23FF4D8C'/%3E%3C/svg%3E") no-repeat center / contain;
+    opacity: 0.14;
+    pointer-events: none;
+  }
+  /* Decorative star — bottom-left corner (smaller) */
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 10px; left: 10px;
+    width: 13px; height: 13px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z' fill='%23FF6550'/%3E%3C/svg%3E") no-repeat center / contain;
+    opacity: 0.11;
+    pointer-events: none;
+  }
   .stat-card.filterable { cursor: pointer; }
+  .stat-card.filterable:hover {
+    transform: scale(1.02);
+    border-color: rgba(255, 26, 108, 0.72);
+    box-shadow: 0 0 0 1px rgba(255,26,108,0.18),
+                0 0 22px rgba(255,26,108,0.22),
+                0 6px 28px rgba(0,0,0,0.55);
+  }
   .stat-card.stat-active {
-    border-top-color: var(--accent-light);
-    box-shadow: 0 0 0 2px var(--accent), 0 4px 20px var(--accent-glow-strong);
-    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent),
+                0 0 28px rgba(255,26,108,0.32),
+                0 6px 28px rgba(0,0,0,0.55);
+    transform: scale(1.02);
   }
   .stat-card.stat-active .stat-number { color: var(--white); }
   .stat-card.stat-active .stat-label  { color: rgba(255,255,255,0.75); }
-  .stat-number { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: 4px; color: var(--accent-light); }
-  .stat-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; }
+  .stat-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 6px;
+    color: var(--accent-light);
+    position: relative;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    position: relative;
+  }
 
   /* FILTER STRIP */
   .filter-strip {
@@ -800,7 +848,9 @@
   /* RESPONSIVE */
   @media (max-width: 700px) {
     .app-header h1 { font-size: 1.5rem; }
-    .stats-banner { grid-template-columns: repeat(2, 1fr); }
+    .stats-banner { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-number { font-size: 1.9rem; }
+    .stat-label  { font-size: 0.64rem; }
     .form-row { grid-template-columns: 1fr !important; }
     .form-row .form-group { grid-column: 1 / -1; }
     .form-row .btn-submit { grid-column: 1 / -1; width: 100%; padding: 13px; font-size: 1rem; }
@@ -1355,6 +1405,15 @@
     /* Filter strip — wrap on small screens */
     .filter-strip { flex-wrap: wrap; row-gap: 6px; }
 
+    /* Genre filter buttons — 44px tap targets */
+    .btn-genre {
+      min-height: 44px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     /* Timeline day squares — slightly larger for easier tapping */
     .tl-day { width: 15px; height: 15px; }
     .tl-dow-label { height: 15px; line-height: 15px; }
@@ -1452,6 +1511,7 @@
   <!-- FICTION PANEL -->
   <div class="tab-panel active" id="panel-fiction">
     <div class="stats-banner" id="stats-fiction"></div>
+    <div id="stat-drill-fiction"></div>
     <div id="filter-strip-fiction"></div>
     <div id="genre-filter-fiction"></div>
     <div class="pick-banner-wrap" id="pick-banner-fiction"></div>
@@ -1500,6 +1560,7 @@
   <!-- NON-FICTION PANEL -->
   <div class="tab-panel" id="panel-nonfiction">
     <div class="stats-banner" id="stats-nonfiction"></div>
+    <div id="stat-drill-nonfiction"></div>
     <div id="filter-strip-nonfiction"></div>
     <div id="genre-filter-nonfiction"></div>
     <div class="pick-banner-wrap" id="pick-banner-nonfiction"></div>
@@ -1795,6 +1856,36 @@
     render(tab);
   }
 
+  function renderStatDrill(tab) {
+    const el = document.getElementById('stat-drill-' + tab);
+    if (!el) return;
+    const status = statFilter[tab];
+    if (!status) { el.innerHTML = ''; return; }
+    const books = loadBooks(tab).filter(b => b.status === status)
+      .sort((a, b) => a.title.localeCompare(b.title));
+    if (!books.length) { el.innerHTML = ''; return; }
+    const rows = books.map(b => {
+      const stars = b.rating
+        ? `<span class="year-drill-stars">${'★'.repeat(b.rating)}${'☆'.repeat(5 - b.rating)}</span>`
+        : `<span class="year-drill-stars" style="color:var(--border-mid)">✩✩✩✩✩</span>`;
+      return `<div class="year-drill-row">
+        <div class="year-drill-info">
+          <div class="year-drill-book-title tl-book-link" onclick="scrollToBook('${b.id}','${tab}')" title="Go to book">${esc(b.title)}</div>
+          <div class="year-drill-author">${esc(b.author || '—')}</div>
+        </div>${stars}</div>`;
+    }).join('');
+    el.innerHTML = `<div class="year-drill-wrap" style="margin-bottom:14px">
+      <div class="year-drill-header">
+        <div>
+          <span class="year-drill-title"><em>${esc(status)}</em></span>
+          <span class="year-drill-subtitle">${books.length} book${books.length !== 1 ? 's' : ''}</span>
+        </div>
+        <button class="btn-year-close" onclick="setStatFilter('${tab}',null)" title="Close">✕</button>
+      </div>
+      <div class="year-drill-list">${rows}</div>
+    </div>`;
+  }
+
   function renderStatFilter(tab) {
     const el = document.getElementById('filter-strip-' + tab);
     if (!el) return;
@@ -1889,6 +1980,7 @@
     if (genreFilter[tab]) filtered = filtered.filter(b => (b.genres || []).includes(genreFilter[tab]));
     const sorted = sortBooks(filtered, sortState.col, sortState.dir, sortState.statusDir || 'asc');
     renderStats(tab, books);
+    renderStatDrill(tab);
     renderStatFilter(tab);
     renderGenreFilter(tab);
     renderTable(tab, sorted, sortState);
@@ -2188,13 +2280,22 @@
   }
 
   function scrollToBook(id, tab) {
-    // Switch to correct tab if needed
+    // Clear any active filters so the target book is guaranteed to be in the rendered list
+    statFilter[tab]      = null;
+    genreFilter[tab]     = null;
+    genreFilterOpen[tab] = false;
+    searchQuery[tab]     = '';
+    const searchEl = document.getElementById('search-' + tab);
+    if (searchEl) searchEl.value = '';
+
+    // Switch tab if needed, then always re-render to flush cleared filters
     const activePanel = document.querySelector('.tab-panel.active');
     if (!activePanel || activePanel.id !== 'panel-' + tab) {
       switchTab(tab);
-      render(tab);
     }
-    // Wait for render then scroll — works for both table rows (desktop) and cards (mobile)
+    render(tab);
+
+    // Two rAFs: first lets the DOM paint after render, second ensures layout is stable
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const el = document.querySelector(`tr[data-book-id="${id}"]`) ||
@@ -2233,7 +2334,7 @@
           return `<div class="year-drill-row">
             ${pill}
             <div class="year-drill-info">
-              <div class="year-drill-book-title">${esc(b.title)}</div>
+              <div class="year-drill-book-title tl-book-link" onclick="scrollToBook('${b.id}','${b._tab}')" title="Go to book">${esc(b.title)}</div>
               <div class="year-drill-author">${esc(b.author || '—')}</div>
             </div>
             ${stars}
@@ -3179,8 +3280,12 @@
     render(tab);
   }
   function setGenreFilter(tab, genre) {
-    genreFilter[tab] = genre || null;
-    if (!genre) genreFilterOpen[tab] = false;
+    if (genre && genreFilter[tab] === genre) {
+      genreFilter[tab] = null; // tap active genre → deselect, keep panel open
+    } else {
+      genreFilter[tab] = genre || null;
+      if (!genre) genreFilterOpen[tab] = false; // "All" closes panel
+    }
     render(tab);
   }
   function showGfAddInput(tab) {
