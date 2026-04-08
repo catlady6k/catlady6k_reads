@@ -2708,12 +2708,12 @@
     book.pagesRead = val;
     saveBooks(tab, books);
     sbUpsertDebounced(book, tab, 'pr_' + id);
-    // Patch DOM without re-render to preserve focus
-    const row = input.closest('tr');
-    if (row) {
-      const pct = book.pages ? Math.min(100, Math.round(val / Number(book.pages) * 100)) : 0;
-      const fill  = row.querySelector('.progress-bar-fill');
-      const label = row.querySelector('.progress-label');
+    // Patch DOM without re-render to preserve focus — works for table rows (desktop) and cards (mobile)
+    const pct       = book.pages ? Math.min(100, Math.round(val / Number(book.pages) * 100)) : 0;
+    const container = input.closest('tr') || input.closest('.book-card');
+    if (container) {
+      const fill  = container.querySelector('.progress-bar-fill');
+      const label = container.querySelector('.progress-label');
       if (fill)  fill.style.width = pct + '%';
       if (label) label.textContent = `${val} / ${book.pages || '?'} pages — ${pct}%`;
     }
