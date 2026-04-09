@@ -731,7 +731,7 @@
   .empty-sub { color: var(--text-muted); font-size: 0.9rem; }
 
   /* YEAR STATS SECTION */
-  .year-section { width: 100%; padding: 0 20px 48px; }
+  .year-section { width: 100%; padding: 0 0 40px; }
   .year-section-title {
     font-size: 0.72rem;
     font-weight: 700;
@@ -879,7 +879,7 @@
     .stat-card { padding: 12px 10px; }
     .stat-number { font-size: 1.4rem; }
     .main { padding: 16px 12px 24px; }
-    .year-section { padding: 0 12px 32px; }
+    .year-section { padding: 0 0 32px; }
     .year-grid { grid-template-columns: 1fr; }
   }
 
@@ -1083,7 +1083,7 @@
   .btn-gf-cancel:hover { color: var(--text-primary); }
 
   /* ---- READING TIMELINE (contribution graph) ---- */
-  .timeline-section { width: 100%; padding: 0 20px 32px; }
+  .timeline-section { width: 100%; padding: 0 0 32px; }
   .timeline-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 14px; gap: 10px;
@@ -1176,12 +1176,12 @@
   .row-highlight { animation: rowHighlight 1.4s ease-out; }
 
   @media (max-width: 700px) {
-    .timeline-section { padding: 0 12px 24px; }
+    .timeline-section { padding: 0 0 24px; }
     .timeline-graph-wrap { padding: 12px 10px 10px; }
   }
 
   /* Reading goal bar */
-  .goal-bar-section { width: 100%; padding: 4px 20px 20px; }
+  .goal-bar-section { width: 100%; padding: 4px 0 24px; }
   .goal-bar-empty { text-align: center; padding: 10px 0; }
   .btn-goal-set {
     background: none; border: 1px dashed var(--border-mid); border-radius: 8px;
@@ -1479,6 +1479,58 @@
   .sync-warn    { color: #B07A10; }
   .sync-error   { color: #C03030; }
   .sync-loading { color: var(--text-muted); }
+
+  /* ---- STATS TAB CHARTS ---- */
+  .stats-chart-section {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px 20px;
+    margin-bottom: 20px;
+  }
+  .stats-chart-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stats-chart-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .chart-bars { display: flex; flex-direction: column; gap: 9px; }
+  .chart-bar-row { display: flex; align-items: center; gap: 10px; }
+  .chart-bar-label {
+    width: 100px; min-width: 100px; text-align: right;
+    font-size: 0.74rem; color: var(--text-secondary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .chart-bar-track {
+    flex: 1; height: 11px;
+    background: var(--surface-3); border-radius: 99px; overflow: hidden;
+  }
+  .chart-bar-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
+    box-shadow: 0 0 8px var(--accent-glow);
+    transition: width 0.5s ease;
+  }
+  .chart-bar-fill.chart-bar-genre {
+    background: linear-gradient(90deg, var(--clay-dark), var(--clay-light));
+    box-shadow: 0 0 8px rgba(232,64,42,0.3);
+  }
+  .chart-bar-value {
+    width: 120px; min-width: 120px;
+    font-size: 0.72rem; color: var(--text-muted); font-weight: 600;
+  }
+  .chart-empty {
+    text-align: center; padding: 22px 0;
+    color: var(--text-muted); font-size: 0.84rem; font-style: italic;
+  }
+  @media (max-width: 700px) {
+    .chart-bar-label { width: 72px; min-width: 72px; font-size: 0.68rem; }
+    .chart-bar-value { width: 80px; min-width: 80px; font-size: 0.66rem; }
+    .timeline-section { padding: 0 0 24px; }
+  }
 </style>
 </head>
 <body>
@@ -1495,6 +1547,7 @@
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switchTab('fiction')" id="tab-fiction">Fiction</button>
   <button class="tab-btn" onclick="switchTab('nonfiction')" id="tab-nonfiction">Non-Fiction</button>
+  <button class="tab-btn" onclick="switchTab('stats')" id="tab-stats">Stats</button>
 </div>
 
 <div class="main">
@@ -1605,39 +1658,56 @@
       <div class="table-scroll" id="table-nonfiction"></div>
     </div>
   </div>
-</div>
 
-<!-- CROSS-TAB COMBINED VIEW -->
-<div id="cross-tab-panel"></div>
+  <!-- STATS PANEL -->
+  <div class="tab-panel" id="panel-stats">
 
-<!-- READING TIMELINE -->
-<div class="timeline-section">
-  <div class="timeline-header">
-    <div class="timeline-title">Reading Activity</div>
-    <div class="timeline-year-nav" id="tl-year-nav"></div>
-  </div>
-  <div class="timeline-graph-wrap">
-    <div id="timeline-graph"></div>
-    <div class="tl-legend">
-      <span>Less</span>
-      <div class="tl-legend-swatch" style="background:#2A0010"></div>
-      <div class="tl-legend-swatch" style="background:#A01040"></div>
-      <div class="tl-legend-swatch" style="background:#CC1455"></div>
-      <div class="tl-legend-swatch" style="background:#FF1A6C"></div>
-      <span>More</span>
+    <!-- Reading Goal -->
+    <div id="goal-bar" class="goal-bar-section"></div>
+
+    <!-- Books Finished by Year -->
+    <div class="year-section">
+      <div class="year-section-title">Books Finished by Year</div>
+      <div id="year-stats-content"></div>
+      <div id="year-drill-panel"></div>
     </div>
+
+    <!-- Reading Activity Heatmap -->
+    <div class="timeline-section">
+      <div class="timeline-header">
+        <div class="timeline-title">Reading Activity</div>
+        <div class="timeline-year-nav" id="tl-year-nav"></div>
+      </div>
+      <div class="timeline-graph-wrap">
+        <div id="timeline-graph"></div>
+        <div class="tl-legend">
+          <span>Less</span>
+          <div class="tl-legend-swatch" style="background:#2A0010"></div>
+          <div class="tl-legend-swatch" style="background:#A01040"></div>
+          <div class="tl-legend-swatch" style="background:#CC1455"></div>
+          <div class="tl-legend-swatch" style="background:#FF1A6C"></div>
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Average Pages Read by Year -->
+    <div class="stats-chart-section">
+      <div class="stats-chart-title">Total Pages Read by Year</div>
+      <div id="pages-per-year-chart"></div>
+    </div>
+
+    <!-- Most Read Genres -->
+    <div class="stats-chart-section">
+      <div class="stats-chart-title">Most Read Genres</div>
+      <div id="top-genres-chart"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- READING GOAL -->
-<div id="goal-bar" class="goal-bar-section"></div>
-
-<!-- YEAR STATS -->
-<div class="year-section">
-  <div class="year-section-title">Books Finished by Year</div>
-  <div id="year-stats-content"></div>
-  <div id="year-drill-panel"></div>
-</div>
+<!-- CROSS-TAB COMBINED VIEW (global — replaces .main when active) -->
+<div id="cross-tab-panel"></div>
 
 <!-- UTIL BAR -->
 <div class="util-bar">
@@ -1987,6 +2057,8 @@
     renderYearStats();
     renderTimeline();
     renderGoalBar();
+    renderPagesPerYearChart();
+    renderGenresChart();
     if (crossTabView) renderCrossTabPanel(crossTabView);
   }
 
@@ -2548,6 +2620,14 @@
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('panel-' + tab).classList.add('active');
     document.getElementById('tab-' + tab).classList.add('active');
+    // Refresh all stats-tab visualizations so they're current when opened
+    if (tab === 'stats') {
+      renderGoalBar();
+      renderYearStats();
+      renderTimeline();
+      renderPagesPerYearChart();
+      renderGenresChart();
+    }
   }
 
   function toggleForm(tab) {
@@ -3069,6 +3149,55 @@
     } finally {
       coverFetchPending.delete(bookId);
     }
+  }
+
+  /* ---- STATS TAB CHARTS ---- */
+  function renderPagesPerYearChart() {
+    const el = document.getElementById('pages-per-year-chart');
+    if (!el) return;
+    const allBooks = [...loadBooks('fiction'), ...loadBooks('nonfiction')]
+      .filter(b => b.status === 'Finished' && b.dateFinished && /^\d{4}/.test(b.dateFinished));
+    if (!allBooks.length) { el.innerHTML = '<div class="chart-empty">No finished books yet.</div>'; return; }
+    const byYear = {};
+    allBooks.forEach(b => {
+      const y = b.dateFinished.slice(0, 4);
+      if (!byYear[y]) byYear[y] = { pages: 0, books: 0 };
+      byYear[y].pages += Number(b.pages) || 0;
+      byYear[y].books++;
+    });
+    const years = Object.keys(byYear).sort();
+    const maxPages = Math.max(...years.map(y => byYear[y].pages));
+    el.innerHTML = `<div class="chart-bars">${years.map(y => {
+      const pct = maxPages ? Math.round((byYear[y].pages / maxPages) * 100) : 0;
+      return `<div class="chart-bar-row">
+        <div class="chart-bar-label">${y}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
+        <div class="chart-bar-value">${byYear[y].pages.toLocaleString()} pp &middot; ${byYear[y].books} bk${byYear[y].books !== 1 ? 's' : ''}</div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  function renderGenresChart() {
+    const el = document.getElementById('top-genres-chart');
+    if (!el) return;
+    const allBooks = [...loadBooks('fiction'), ...loadBooks('nonfiction')];
+    const counts = {};
+    allBooks.forEach(b => {
+      (b.genres || []).forEach(g => {
+        if (g && g.trim()) counts[g.trim()] = (counts[g.trim()] || 0) + 1;
+      });
+    });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 12);
+    if (!sorted.length) { el.innerHTML = '<div class="chart-empty">No genres tagged yet.</div>'; return; }
+    const max = sorted[0][1];
+    el.innerHTML = `<div class="chart-bars">${sorted.map(([genre, count]) => {
+      const pct = Math.round((count / max) * 100);
+      return `<div class="chart-bar-row">
+        <div class="chart-bar-label">${esc(genre)}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill chart-bar-genre" style="width:${pct}%"></div></div>
+        <div class="chart-bar-value">${count} book${count !== 1 ? 's' : ''}</div>
+      </div>`;
+    }).join('')}</div>`;
   }
 
   /* ---- GOAL BAR ---- */
