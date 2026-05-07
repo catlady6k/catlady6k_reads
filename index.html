@@ -2772,6 +2772,7 @@
     const books = loadBooks(tab);
     const book  = books.find(b => b.id === id);
     if (!book) return;
+    book.status = 'Finished';
     book.dateFinished = date;
     _applyStatusChange(
       document.querySelector(`select[data-id="${id}"][data-tab="${tab}"]`) || { classList: { remove(){}, add(){}, contains(){} }, addEventListener(){} },
